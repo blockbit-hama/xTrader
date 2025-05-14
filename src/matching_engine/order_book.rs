@@ -35,7 +35,6 @@ impl PriceLevel {
   }
   
   /// 주문 추가
-  /// Order 객체에 이미 ID와 수량 정보가 있으므로 이를 활용합니다.
   pub fn add_order(&mut self, order: Order) {
     let order_id = order.id.clone();
     let quantity = order.remaining_quantity;
@@ -117,7 +116,7 @@ impl PriceLevel {
         // 부분 체결 - 노드의 주문 객체 업데이트
         node.borrow_mut().value.remaining_quantity = cloned_maker.remaining_quantity;
         
-        trace!("주문 부분 체결: {}, 체결량: {}, 남은양: {}", 
+        trace!("주문 부분 체결: {}, 체결량: {}, 남은양: {}",
                     maker_order_id, actual_match, cloned_maker.remaining_quantity);
       }
       
