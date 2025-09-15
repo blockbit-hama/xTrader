@@ -1,0 +1,196 @@
+{
+  "market_data": {
+    "BTC-KRW": {
+      "symbol": "BTC-KRW",
+      "name": "Bitcoin",
+      "base_price": 100000000,
+      "current_price": 100000000,
+      "volatility": 0.025,
+      "volume_range": [1, 100],
+      "price_range": [95000000, 105000000],
+      "daily_volume": 1500000000,
+      "market_cap": 21000000000000,
+      "circulating_supply": 19500000,
+      "trading_hours": "24/7",
+      "tick_size": 1000,
+      "lot_size": 1
+    },
+    "ETH-KRW": {
+      "symbol": "ETH-KRW",
+      "name": "Ethereum",
+      "base_price": 4000000,
+      "current_price": 4000000,
+      "volatility": 0.035,
+      "volume_range": [1, 500],
+      "price_range": [3800000, 4200000],
+      "daily_volume": 800000000,
+      "market_cap": 4800000000000,
+      "circulating_supply": 120000000,
+      "trading_hours": "24/7",
+      "tick_size": 1000,
+      "lot_size": 1
+    },
+    "AAPL": {
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "base_price": 200000,
+      "current_price": 200000,
+      "volatility": 0.015,
+      "volume_range": [100, 10000],
+      "price_range": [190000, 210000],
+      "daily_volume": 50000000,
+      "market_cap": 31000000000000,
+      "circulating_supply": 15500000000,
+      "trading_hours": "09:30-16:00 EST",
+      "tick_size": 100,
+      "lot_size": 100
+    }
+  },
+  "initial_orderbook": {
+    "BTC-KRW": {
+      "bids": [
+        [99950000, 5],
+        [99900000, 12],
+        [99850000, 8],
+        [99800000, 15],
+        [99750000, 20],
+        [99700000, 25],
+        [99650000, 18],
+        [99600000, 30],
+        [99550000, 22],
+        [99500000, 35]
+      ],
+      "asks": [
+        [100050000, 3],
+        [100100000, 7],
+        [100150000, 10],
+        [100200000, 12],
+        [100250000, 15],
+        [100300000, 18],
+        [100350000, 20],
+        [100400000, 25],
+        [100450000, 28],
+        [100500000, 30]
+      ]
+    },
+    "ETH-KRW": {
+      "bids": [
+        [3995000, 25],
+        [3990000, 35],
+        [3985000, 40],
+        [3980000, 50],
+        [3975000, 60],
+        [3970000, 75],
+        [3965000, 45],
+        [3960000, 80],
+        [3955000, 55],
+        [3950000, 90]
+      ],
+      "asks": [
+        [4005000, 20],
+        [4010000, 30],
+        [4015000, 35],
+        [4020000, 45],
+        [4025000, 55],
+        [4030000, 40],
+        [4035000, 65],
+        [4040000, 50],
+        [4045000, 70],
+        [4050000, 60]
+      ]
+    },
+    "AAPL": {
+      "bids": [
+        [199800, 500],
+        [199600, 800],
+        [199400, 1200],
+        [199200, 1000],
+        [199000, 1500],
+        [198800, 2000],
+        [198600, 1800],
+        [198400, 2500],
+        [198200, 2200],
+        [198000, 3000]
+      ],
+      "asks": [
+        [200200, 400],
+        [200400, 600],
+        [200600, 900],
+        [200800, 1100],
+        [201000, 1400],
+        [201200, 1700],
+        [201400, 1300],
+        [201600, 2000],
+        [201800, 1900],
+        [202000, 2200]
+      ]
+    }
+  },
+  "fake_users": [
+    {"id": "user_001", "name": "김투자", "type": "retail", "trading_style": "scalping", "balance": 50000000},
+    {"id": "user_002", "name": "박트레이더", "type": "retail", "trading_style": "swing", "balance": 100000000},
+    {"id": "user_003", "name": "이헤지펀드", "type": "institutional", "trading_style": "arbitrage", "balance": 10000000000},
+    {"id": "user_004", "name": "최알고리즘", "type": "institutional", "trading_style": "market_making", "balance": 5000000000},
+    {"id": "user_005", "name": "정크립토", "type": "retail", "trading_style": "hodl", "balance": 200000000},
+    {"id": "user_006", "name": "한데이트레이더", "type": "retail", "trading_style": "day_trading", "balance": 80000000},
+    {"id": "user_007", "name": "신퀀트", "type": "institutional", "trading_style": "high_frequency", "balance": 20000000000},
+    {"id": "user_008", "name": "장스윙", "type": "retail", "trading_style": "swing", "balance": 150000000},
+    {"id": "user_009", "name": "윤장기", "type": "retail", "trading_style": "position", "balance": 300000000},
+    {"id": "user_010", "name": "김로보", "type": "institutional", "trading_style": "algorithmic", "balance": 8000000000}
+  ],
+  "trading_patterns": {
+    "scalping": {
+      "order_frequency_ms": 1000,
+      "price_deviation": 0.001,
+      "quantity_range": [1, 10],
+      "hold_time_ms": 5000
+    },
+    "swing": {
+      "order_frequency_ms": 300000,
+      "price_deviation": 0.02,
+      "quantity_range": [10, 100],
+      "hold_time_ms": 3600000
+    },
+    "day_trading": {
+      "order_frequency_ms": 60000,
+      "price_deviation": 0.005,
+      "quantity_range": [5, 50],
+      "hold_time_ms": 1800000
+    },
+    "market_making": {
+      "order_frequency_ms": 500,
+      "price_deviation": 0.0005,
+      "quantity_range": [1, 20],
+      "hold_time_ms": 10000
+    },
+    "high_frequency": {
+      "order_frequency_ms": 100,
+      "price_deviation": 0.0001,
+      "quantity_range": [1, 5],
+      "hold_time_ms": 1000
+    }
+  },
+  "historical_data": {
+    "BTC-KRW": {
+      "1m_candles": [
+        {"timestamp": 1694707200, "open": 99800000, "high": 100200000, "low": 99600000, "close": 100000000, "volume": 150},
+        {"timestamp": 1694707260, "open": 100000000, "high": 100400000, "low": 99800000, "close": 100100000, "volume": 180},
+        {"timestamp": 1694707320, "open": 100100000, "high": 100300000, "low": 99900000, "close": 99950000, "volume": 120}
+      ]
+    },
+    "ETH-KRW": {
+      "1m_candles": [
+        {"timestamp": 1694707200, "open": 3980000, "high": 4020000, "low": 3970000, "close": 4000000, "volume": 850},
+        {"timestamp": 1694707260, "open": 4000000, "high": 4040000, "low": 3990000, "close": 4010000, "volume": 920},
+        {"timestamp": 1694707320, "open": 4010000, "high": 4030000, "low": 3995000, "close": 4005000, "volume": 780}
+      ]
+    },
+    "AAPL": {
+      "1m_candles": [
+        {"timestamp": 1694707200, "open": 199500, "high": 200500, "low": 199200, "close": 200000, "volume": 15000},
+        {"timestamp": 1694707260, "open": 200000, "high": 200800, "low": 199800, "close": 200200, "volume": 18000},
+        {"timestamp": 1694707320, "open": 200200, "high": 200600, "low": 199900, "close": 200100, "volume": 12000}
+      ]
+    }
+  }
+}

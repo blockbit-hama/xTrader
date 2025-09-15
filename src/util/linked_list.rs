@@ -5,16 +5,15 @@
 * description: 
 **/
 
-use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::sync::{Arc, Mutex, Weak};
 use std::collections::HashMap;
 
-type Link<T> = Option<Rc<RefCell<Node<T>>>>;
+type Link<T> = Option<Arc<Mutex<Node<T>>>>;
 
 #[derive(Debug)]
 pub struct Node<T> {
   pub value: T,
-  prev: Option<Weak<RefCell<Node<T>>>>,
+  prev: Option<Weak<Mutex<Node<T>>>>,
   next: Link<T>,
 }
 
@@ -30,13 +29,17 @@ impl<T> DoublyLinkedList<T> {
     DoublyLinkedList { head: None, tail: None , count: 0}
   }
   
-  pub fn push_back(&mut self, value: T) -> Rc<RefCell<Node<T>>> {
-    let new_node = Rc::new(RefCell::new(Node {value, prev: None, next: None }));
+  pub fn push_back(&mut self, value: T) -> Arc<Mutex<Node<T>>> {
+    let new_node = Arc::new(Mutex::new(Node {value, prev: None, next: None }));
     
     match self.tail.take() {
       Some(old_tail) => {
-        old_tail.borrow_mut().next = Some(new_node.clone());
-        new_node.borrow_mut().prev = Some(Rc::downgrade(&old_tail));
+        if let Ok(mut tail) = old_tail.lock() {
+          tail.next = Some(new_node.clone());
+        }
+        if let Ok(mut new_node_mut) = new_node.lock() {
+          new_node_mut.prev = Some(Arc::downgrade(&old_tail));
+        }
         self.tail = Some(new_node.clone());
       }
       None => {
@@ -48,13 +51,24 @@ impl<T> DoublyLinkedList<T> {
     new_node
   }
   
-  pub fn remove(&mut self, node: Rc<RefCell<Node<T>>>) {
-    let prev = node.borrow().prev.clone();
-    let next = node.borrow().next.clone();
+  pub fn remove(&mut self, node: Arc<Mutex<Node<T>>>) {
+    let prev = if let Ok(node_guard) = node.lock() {
+      node_guard.prev.clone()
+    } else {
+      return;
+    };
+    
+    let next = if let Ok(node_guard) = node.lock() {
+      node_guard.next.clone()
+    } else {
+      return;
+    };
     
     if let Some(ref prev_weak) = prev {
       if let Some(prev) = prev_weak.upgrade() {
-        prev.borrow_mut().next = next.clone();
+        if let Ok(mut prev_guard) = prev.lock() {
+          prev_guard.next = next.clone();
+        }
       }
     } else {
       // Removing head
@@ -62,7 +76,9 @@ impl<T> DoublyLinkedList<T> {
     }
     
     if let Some(next) = next {
-      next.borrow_mut().prev = prev;
+      if let Ok(mut next_guard) = next.lock() {
+        next_guard.prev = prev;
+      }
     } else {
       self.tail = prev.and_then(|w| w.upgrade());
     }
@@ -70,20 +86,24 @@ impl<T> DoublyLinkedList<T> {
     self.count -= 1;
   }
   
-  pub fn pop_front(&mut self) -> Option<Rc<RefCell<Node<T>>>> {
+  pub fn pop_front(&mut self) -> Option<Arc<Mutex<Node<T>>>> {
     self.head.take().map(|old_head| {
-      if let Some(next) = old_head.borrow_mut().next.take() {
-        next.borrow_mut().prev.take();
-        self.head = Some(next);
-      } else {
-        self.tail.take();
+      if let Ok(mut head_guard) = old_head.lock() {
+        if let Some(next) = head_guard.next.take() {
+          if let Ok(mut next_guard) = next.lock() {
+            next_guard.prev.take();
+          }
+          self.head = Some(next);
+        } else {
+          self.tail.take();
+        }
       }
       self.count = self.count.saturating_sub(1);
       old_head
     })
   }
   
-  pub fn peek_front(&self) -> Option<Rc<RefCell<Node<T>>>> {
+  pub fn peek_front(&self) -> Option<Arc<Mutex<Node<T>>>> {
     self.head.as_ref().map(|node| node.clone())
   }
   
@@ -115,7 +135,7 @@ mod tests {
     
     // 첫 번째 노드 추가
     let node1 = list.push_back(10);
-    assert_eq!(node1.borrow().value, 10);
+    assert_eq!(node1.lock().unwrap().value, 10);
     assert!(!list.is_empty());
     assert_eq!(list.len(), 1);
     

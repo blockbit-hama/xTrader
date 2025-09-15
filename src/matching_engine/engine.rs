@@ -8,6 +8,7 @@ use crate::matching_engine::model::{
   Order, OrderType, Side, ExecutionReport, OrderBookSnapshot
 };
 use crate::matching_engine::order_book::OrderBook;
+use crate::api::models::WebSocketMessage;
 
 /// 매칭 엔진 구현
 pub struct MatchingEngine {
@@ -17,6 +18,8 @@ pub struct MatchingEngine {
   order_store: HashMap<String, Order>,
   /// 체결 보고서 송신 채널
   exec_tx: Sender<ExecutionReport>,
+  /// WebSocket 브로드캐스트 채널
+  broadcast_tx: Option<tokio::sync::broadcast::Sender<WebSocketMessage>>,
 }
 
 impl MatchingEngine {
@@ -33,7 +36,13 @@ impl MatchingEngine {
       order_books,
       order_store: HashMap::new(),
       exec_tx,
+      broadcast_tx: None,
     }
+  }
+
+  /// WebSocket 브로드캐스트 채널 설정
+  pub fn set_broadcast_channel(&mut self, broadcast_tx: tokio::sync::broadcast::Sender<WebSocketMessage>) {
+    self.broadcast_tx = Some(broadcast_tx);
   }
   
   /// 매칭 엔진 실행 (주문 처리 루프)
@@ -58,9 +67,32 @@ impl MatchingEngine {
     
     info!("매칭 엔진 종료");
   }
+
+  /// 시퀀서를 통한 매칭 엔진 실행 (순서 보장)
+  pub fn run_sequenced(&mut self, mut order_rx: Receiver<Order>) {
+    info!("매칭 엔진 시작 (시퀀서 모드)");
+    
+    // 주문 수신 및 처리 (FIFO 순서 보장)
+    while let Ok(order) = order_rx.recv() {
+      if order.is_cancel {
+        debug!("[시퀀서] 취소 주문 수신: {}", order.id);
+        self.handle_cancel_order(&order);
+      } else {
+        debug!("[시퀀서] 새 주문 수신: {} ({}, {}, 가격: {}, 수량: {})", 
+                      order.id, 
+                      order.symbol,
+                      if let Side::Buy = order.side { "매수" } else { "매도" },
+                      order.price,
+                      order.quantity);
+        self.process_order(order);
+      }
+    }
+    
+    info!("매칭 엔진 종료 (시퀀서 모드)");
+  }
   
   /// 취소 주문 처리
-  fn handle_cancel_order(&mut self, cancel_order: &Order) {
+  pub fn handle_cancel_order(&mut self, cancel_order: &Order) {
     if let Some(target_order_id) = &cancel_order.target_order_id {
       // 취소할 원본 주문 찾기
       if let Some(order) = self.order_store.get(target_order_id) {
@@ -104,6 +136,9 @@ impl MatchingEngine {
       } else {
         warn!("취소할 주문을 저장소에서 찾을 수 없음: {}", target_order_id);
       }
+      
+      // 취소 처리 후 호가창 업데이트 브로드캐스트
+      self.broadcast_orderbook_update(&cancel_order.symbol);
     } else {
       error!("취소 주문에 대상 주문 ID가 없음: {}", cancel_order.id);
     }
@@ -145,6 +180,9 @@ impl MatchingEngine {
         }
       }
     }
+    
+    // 주문 처리 후 호가창 업데이트 브로드캐스트
+    self.broadcast_orderbook_update(&symbol);
   }
   
   /// 시장가 주문 매칭
@@ -438,6 +476,27 @@ impl MatchingEngine {
                  order_book.bid_count(), 
                  order_book.ask_count(),
                  order_book.order_count());
+    }
+  }
+
+  /// 호가창 업데이트 브로드캐스트
+  fn broadcast_orderbook_update(&self, symbol: &str) {
+    if let Some(ref broadcast_tx) = self.broadcast_tx {
+      if let Some(snapshot) = self.get_order_book_snapshot(symbol, 10) {
+        let message = WebSocketMessage::OrderBookUpdate {
+          symbol: symbol.to_string(),
+          bids: snapshot.bids,
+          asks: snapshot.asks,
+          timestamp: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64,
+        };
+        
+        if let Err(e) = broadcast_tx.send(message) {
+          warn!("호가창 업데이트 브로드캐스트 실패: {}", e);
+        }
+      }
     }
   }
 }

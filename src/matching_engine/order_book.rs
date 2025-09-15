@@ -4,8 +4,7 @@
 //! 주문장은 매수/매도 호가를 관리하고, 가격 레벨은 특정 가격의 주문들을 처리합니다.
 
 use std::collections::{BTreeMap, HashMap};
-use std::rc::Rc;
-use std::cell::RefCell;
+use std::sync::{Arc, Mutex};
 use std::cmp::Reverse;
 use log::{debug, trace};
 
@@ -19,7 +18,7 @@ pub struct PriceLevel {
   /// 주문 리스트 (시간 우선순위)
   orders: DoublyLinkedList<Order>,
   /// 주문 ID → 노드 참조 맵핑
-  order_map: HashMap<String, Rc<RefCell<Node<Order>>>>,
+  order_map: HashMap<String, Arc<Mutex<Node<Order>>>>,
   /// 총 주문 수량
   pub total_volume: u64,
 }
@@ -54,14 +53,22 @@ impl PriceLevel {
     // 주문 ID로 노드 찾기
     if let Some(node) = self.order_map.remove(order_id) {
       // 총 수량에서 주문 수량 차감
-      let quantity = node.borrow().value.remaining_quantity;
+      let quantity = if let Ok(node_guard) = node.lock() {
+        node_guard.value.remaining_quantity
+      } else {
+        0
+      };
       self.total_volume = self.total_volume.saturating_sub(quantity);
       
       // 링크드 리스트에서 노드 제거
       self.orders.remove(node.clone());
       
       // 노드에서 주문 객체 추출
-      let order = node.borrow().value.clone();
+      let order = if let Ok(node_guard) = node.lock() {
+        node_guard.value.clone()
+      } else {
+        return None;
+      };
       Some(order)
     } else {
       None
@@ -71,11 +78,15 @@ impl PriceLevel {
   /// 첫 번째 주문 정보 조회 (제거하지 않음)
   pub fn peek_front(&self) -> Option<(String, Order, u64)> {
     if let Some(node) = self.orders.peek_front() {
-      let order = node.borrow().value.clone();
-      let order_id = order.id.clone();
-      let quantity = order.remaining_quantity;
-      
-      Some((order_id, order, quantity))
+      if let Ok(node_guard) = node.lock() {
+        let order = node_guard.value.clone();
+        let order_id = order.id.clone();
+        let quantity = order.remaining_quantity;
+        
+        Some((order_id, order, quantity))
+      } else {
+        None
+      }
     } else {
       None
     }
@@ -83,12 +94,19 @@ impl PriceLevel {
   
   /// 첫 번째 주문 수량 조회
   pub fn get_front_quantity(&self) -> Option<u64> {
-    self.orders.peek_front().map(|node| node.borrow().value.remaining_quantity)
+    self.orders.peek_front().and_then(|node| {
+      node.lock().ok().map(|node_guard| node_guard.value.remaining_quantity)
+    })
   }
   
   pub fn match_partial(&mut self, match_quantity: u64) -> Option<(String, Order, u64)> {
     if let Some(node) = self.orders.peek_front() {
-      let mut cloned_maker = node.borrow_mut().value.clone();
+      let mut cloned_maker = if let Ok(node_guard) = node.lock() {
+        node_guard.value.clone()
+      } else {
+        return None;
+      };
+      
       let maker_order_id = cloned_maker.id.clone();
       let maker_current_quantity = cloned_maker.remaining_quantity;
       
@@ -106,7 +124,6 @@ impl PriceLevel {
         self.order_map.remove(&maker_order_id);
         
         // 링크드 리스트에서 첫 번째 노드를 제거
-        // pop_front 대신 첫 번째 노드를 찾아서 제거
         if let Some(front_node) = self.orders.peek_front() {
           self.orders.remove(front_node.clone());
         }
@@ -114,7 +131,9 @@ impl PriceLevel {
         trace!("주문 완전 체결: {}, 체결량: {}", maker_order_id, actual_match);
       } else {
         // 부분 체결 - 노드의 주문 객체 업데이트
-        node.borrow_mut().value.remaining_quantity = cloned_maker.remaining_quantity;
+        if let Ok(mut node_guard) = node.lock() {
+          node_guard.value.remaining_quantity = cloned_maker.remaining_quantity;
+        }
         
         trace!("주문 부분 체결: {}, 체결량: {}, 남은양: {}",
                     maker_order_id, actual_match, cloned_maker.remaining_quantity);
