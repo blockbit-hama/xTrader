@@ -16,12 +16,13 @@ export const useTradingAPI = (symbol: string) => {
   // Fetch order book
   const fetchOrderBook = useCallback(async (isBackground = false) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/orderbook/${symbol}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/orderbook/${symbol}?depth=15`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setOrderBook(data);
+      console.log('📊 호가창 데이터 수신:', data);
+      setOrderBook(data.orderbook); // 백엔드는 { orderbook: {...} } 형태로 응답
       if (!isBackground) {
         setError(null);
       }

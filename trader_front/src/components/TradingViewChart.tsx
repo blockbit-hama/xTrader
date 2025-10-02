@@ -78,15 +78,23 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
     if (!candlestickSeriesRef.current || !data.length) return;
 
     // 데이터를 TradingView 형식으로 변환
-    const formattedData = data.map((candle) => ({
-      time: Math.floor(candle.open_time / 1000) as any, // Unix timestamp in seconds
-      open: candle.open / 1000000, // 백만원 단위로 변환 (55백만 -> 55)
-      high: candle.high / 1000000,
-      low: candle.low / 1000000,
-      close: candle.close / 1000000,
-    }));
+    const formattedData = data
+      .map((candle) => ({
+        time: Math.floor(candle.open_time / 1000) as any, // Unix timestamp in seconds
+        open: candle.open / 1000000, // 백만원 단위로 변환 (55백만 -> 55)
+        high: candle.high / 1000000,
+        low: candle.low / 1000000,
+        close: candle.close / 1000000,
+      }))
+      // 시간순으로 정렬
+      .sort((a, b) => a.time - b.time)
+      // 중복된 타임스탬프 제거 (같은 시간에 여러 캔들이 있으면 마지막 것만 사용)
+      .filter((candle, index, array) => {
+        if (index === 0) return true;
+        return candle.time !== array[index - 1].time;
+      });
 
-    console.log('📊 TradingView 차트 데이터:', formattedData.slice(0, 3));
+    console.log('📊 TradingView 차트 데이터 (정렬/중복제거):', formattedData.slice(0, 3));
 
     candlestickSeriesRef.current.setData(formattedData);
   }, [data]);

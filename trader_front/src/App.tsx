@@ -1,8 +1,8 @@
 import React from 'react';
-import SimpleApp from './components/SimpleApp';
+import TabbedApp from './components/TabbedApp';
 
 function App() {
-  return <SimpleApp />;
+  return <TabbedApp />;
 }
 
 export default App;

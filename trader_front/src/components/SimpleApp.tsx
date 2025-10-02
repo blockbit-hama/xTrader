@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTradingAPI } from '../hooks/useTradingAPI';
 import TradingViewChart from './TradingViewChart';
+import DepthOfMarket from './DepthOfMarket';
 
 const SimpleApp: React.FC = () => {
   const [balance] = useState({ BTC: 1.5, KRW: 50000000 });
@@ -20,6 +21,33 @@ const SimpleApp: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, [loading, candles.length]);
+
+  // Mock 호가 데이터 생성 함수
+  const generateMockOrderBook = () => {
+    const basePrice = 55000000; // 5500만원
+    const bids: Array<{price: number; volume: number}> = [];
+    const asks: Array<{price: number; volume: number}> = [];
+
+    // 매수 호가 생성 (현재가보다 낮은 가격)
+    for (let i = 0; i < 15; i++) {
+      bids.push({
+        price: basePrice - (i * 50000) - 50000,
+        volume: Math.random() * 10 + 0.5,
+      });
+    }
+
+    // 매도 호가 생성 (현재가보다 높은 가격)
+    for (let i = 0; i < 15; i++) {
+      asks.push({
+        price: basePrice + (i * 50000) + 50000,
+        volume: Math.random() * 10 + 0.5,
+      });
+    }
+
+    return { bids, asks };
+  };
+
+  const mockOrderBook = generateMockOrderBook();
 
   // Mock 캔들 데이터 (백엔드 연결 안될 때 테스트용)
   const mockCandles = [
@@ -159,13 +187,13 @@ const SimpleApp: React.FC = () => {
   };
 
   const titleStyle: React.CSSProperties = {
-    fontSize: '24px',
+    fontSize: '48px',
     fontWeight: 'bold',
     color: '#3b82f6'
   };
 
   const priceStyle: React.CSSProperties = {
-    fontSize: '20px',
+    fontSize: '40px',
     fontWeight: 'bold',
     color: '#02c076'
   };
@@ -174,7 +202,7 @@ const SimpleApp: React.FC = () => {
     backgroundColor: '#1e2329',
     padding: '12px',
     borderRadius: '8px',
-    fontSize: '14px'
+    fontSize: '28px'
   };
 
   const mainStyle: React.CSSProperties = {
@@ -239,7 +267,7 @@ const SimpleApp: React.FC = () => {
     color: '#848e9c',
     cursor: 'pointer',
     borderBottom: '2px solid transparent',
-    fontSize: '14px',
+    fontSize: '28px',
     fontWeight: '500'
   };
 
@@ -254,7 +282,7 @@ const SimpleApp: React.FC = () => {
     backgroundColor: '#2b3139',
     color: '#c7c9cb',
     marginRight: '8px',
-    fontSize: '12px'
+    fontSize: '24px'
   };
 
   const activeOrderTypeButtonStyle: React.CSSProperties = {
@@ -292,15 +320,15 @@ const SimpleApp: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div>
             <h1 style={titleStyle}>📈 xTrader</h1>
-            <div style={{ fontSize: '12px', color: '#848e9c' }}>Professional Trading Platform</div>
+            <div style={{ fontSize: '24px', color: '#848e9c' }}>Professional Trading Platform</div>
           </div>
           <div>
-            <div style={{ fontSize: '12px', color: '#848e9c' }}>BTC-KRW</div>
+            <div style={{ fontSize: '24px', color: '#848e9c' }}>BTC-KRW</div>
             <div style={priceStyle}>
               {formatNumber(currentPrice)} KRW
               {displayStatistics && (
                 <span style={{
-                  fontSize: '14px',
+                  fontSize: '28px',
                   color: displayStatistics.price_change_24h >= 0 ? '#02c076' : '#f84960',
                   marginLeft: '12px'
                 }}>
@@ -324,8 +352,8 @@ const SimpleApp: React.FC = () => {
           {/* Chart */}
           <div style={{...cardStyle, padding: 0}}>
             <div style={{ padding: '16px 16px 8px 16px' }}>
-              <div style={{ fontSize: '18px', marginBottom: '8px', color: '#3b82f6' }}>📊 BTC-KRW 실시간 차트</div>
-              <div style={{ fontSize: '14px', color: candles.length > 0 ? '#02c076' : '#fbbf24', marginBottom: '8px' }}>
+              <div style={{ fontSize: '36px', marginBottom: '8px', color: '#3b82f6' }}>📊 BTC-KRW 실시간 차트</div>
+              <div style={{ fontSize: '28px', color: candles.length > 0 ? '#02c076' : '#fbbf24', marginBottom: '8px' }}>
                 {loading && candles.length === 0 && !showMockData ? (
                   '⏳ 데이터 로딩 중...'
                 ) : candles.length > 0 ? (
@@ -357,12 +385,12 @@ const SimpleApp: React.FC = () => {
             )}
 
             <div style={{ padding: '8px 16px 16px 16px', borderTop: '1px solid #2b3139' }}>
-              <div style={{ fontSize: '12px', color: '#848e9c' }}>
+              <div style={{ fontSize: '24px', color: '#848e9c' }}>
                 고가: ₩{formatNumber(Math.max(...chartCandles.map(c => c.high || 0)))}<br/>
                 저가: ₩{formatNumber(Math.min(...chartCandles.map(c => c.low || 0)))}<br/>
                 거래량: {chartCandles.reduce((sum, c) => sum + (c.volume || 0), 0).toLocaleString()}
               </div>
-              <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '8px' }}>
+              <div style={{ fontSize: '20px', color: '#6b7280', marginTop: '8px' }}>
                 {candles.length > 0 ? '🎯 TradingView 실시간 캔들스틱 차트' : '🧪 TradingView 테스트용 Mock 차트'}
               </div>
             </div>
@@ -379,7 +407,7 @@ const SimpleApp: React.FC = () => {
                     justifyContent: 'space-between',
                     padding: '8px 0',
                     borderBottom: index < 4 ? '1px solid #2b3139' : 'none',
-                    fontSize: '12px'
+                    fontSize: '24px'
                   }}>
                     <span style={{ color: execution.side === 'Buy' ? '#02c076' : '#f84960' }}>
                       {execution.side === 'Buy' ? '매수' : '매도'}
@@ -403,7 +431,7 @@ const SimpleApp: React.FC = () => {
         {/* Right Panel - Trading Form & Order Book */}
         <div style={rightPanelStyle}>
           {/* Trading Form */}
-          <div style={cardStyle}>
+          <div style={cardStyle} data-order-form>
             {/* 매수/매도 탭 */}
             <div style={{ display: 'flex', marginBottom: '16px', borderBottom: '1px solid #2b3139' }}>
               <button
@@ -422,7 +450,7 @@ const SimpleApp: React.FC = () => {
 
             {/* 주문 타입 선택 */}
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ fontSize: '14px', color: '#c7c9cb', marginBottom: '8px' }}>주문 타입</div>
+              <div style={{ fontSize: '28px', color: '#c7c9cb', marginBottom: '8px' }}>주문 타입</div>
               <div style={{ display: 'flex' }}>
                 <button
                   style={orderType === 'Limit' ? activeOrderTypeButtonStyle : orderTypeButtonStyle}
@@ -442,7 +470,7 @@ const SimpleApp: React.FC = () => {
             {/* 가격 입력 (지정가일 때만) */}
             {orderType === 'Limit' && (
               <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '14px', color: '#c7c9cb', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontSize: '28px', color: '#c7c9cb', display: 'block', marginBottom: '4px' }}>
                   가격 (KRW)
                 </label>
                 <input
@@ -458,7 +486,7 @@ const SimpleApp: React.FC = () => {
             {/* 시장가 가격 표시 */}
             {orderType === 'Market' && (
               <div style={{ marginBottom: '12px' }}>
-                <div style={{ fontSize: '14px', color: '#c7c9cb', marginBottom: '4px' }}>
+                <div style={{ fontSize: '28px', color: '#c7c9cb', marginBottom: '4px' }}>
                   예상 체결가 (KRW)
                 </div>
                 <div style={{
@@ -476,7 +504,7 @@ const SimpleApp: React.FC = () => {
 
             {/* 수량 입력 */}
             <div style={{ marginBottom: '12px' }}>
-              <label style={{ fontSize: '14px', color: '#c7c9cb', display: 'block', marginBottom: '4px' }}>
+              <label style={{ fontSize: '28px', color: '#c7c9cb', display: 'block', marginBottom: '4px' }}>
                 수량 (BTC)
               </label>
               <input
@@ -492,17 +520,17 @@ const SimpleApp: React.FC = () => {
 
             {/* 예상 총액 */}
             <div style={{ marginBottom: '16px', padding: '8px', backgroundColor: '#1e2329', borderRadius: '4px' }}>
-              <div style={{ fontSize: '12px', color: '#c7c9cb' }}>
+              <div style={{ fontSize: '24px', color: '#c7c9cb' }}>
                 예상 총액: {orderQuantity && parseFloat(orderQuantity) > 0 ?
                   `${formatNumber((parseFloat(orderQuantity) * (orderType === 'Market' ? currentPrice : parseFloat(orderPrice || '0'))))} KRW` :
                   '0 KRW'}
               </div>
-              <div style={{ fontSize: '12px', color: '#848e9c', marginTop: '4px' }}>
+              <div style={{ fontSize: '24px', color: '#848e9c', marginTop: '4px' }}>
                 수수료 (0.1%): {orderQuantity && parseFloat(orderQuantity) > 0 ?
                   `≈ ${formatNumber((parseFloat(orderQuantity) * (orderType === 'Market' ? currentPrice : parseFloat(orderPrice || '0')) * 0.001))} KRW` :
                   '0 KRW'}
               </div>
-              <div style={{ fontSize: '12px', color: '#848e9c', marginTop: '2px' }}>
+              <div style={{ fontSize: '24px', color: '#848e9c', marginTop: '2px' }}>
                 {orderSide === 'Buy' ? '필요 KRW: ' : '보유 BTC: '}
                 {orderSide === 'Buy' ? `${formatNumber(balance.KRW)} KRW` : `${balance.BTC} BTC`}
               </div>
@@ -522,57 +550,31 @@ const SimpleApp: React.FC = () => {
             </button>
           </div>
 
-          {/* Order Book */}
-          <div style={cardStyle}>
-            <h3 style={{ marginTop: 0, marginBottom: '16px' }}>호가창</h3>
-
-            {orderBook ? (
-              <div style={{ fontSize: '12px', fontFamily: 'monospace' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '8px', color: '#848e9c' }}>
-                  <div>가격</div>
-                  <div style={{ textAlign: 'right' }}>수량</div>
-                  <div style={{ textAlign: 'right' }}>누적</div>
-                </div>
-
-                {/* Ask (매도) - 높은 가격부터 */}
-                {orderBook.asks.slice(0, 5).reverse().map((ask, i) => {
-                  const cumulative = orderBook.asks.slice(0, orderBook.asks.indexOf(ask) + 1)
-                    .reduce((sum, a) => sum + a.volume, 0);
-                  return (
-                    <div key={`ask-${i}`} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '2px', padding: '2px 0' }}>
-                      <div style={{ color: '#f84960' }}>{formatNumber(ask.price)}</div>
-                      <div style={{ textAlign: 'right', color: '#ffffff' }}>{ask.volume.toFixed(6)}</div>
-                      <div style={{ textAlign: 'right', color: '#c7c9cb' }}>{cumulative.toFixed(6)}</div>
-                    </div>
-                  );
-                })}
-
-                {/* Spread */}
-                <div style={{ textAlign: 'center', padding: '8px 0', color: '#848e9c', borderTop: '1px solid #2b3139', borderBottom: '1px solid #2b3139', margin: '8px 0' }}>
-                  {orderBook.asks.length > 0 && orderBook.bids.length > 0 ?
-                    `스프레드: ${formatNumber(orderBook.asks[0].price - orderBook.bids[0].price)}` :
-                    '스프레드: -'}
-                </div>
-
-                {/* Bid (매수) - 높은 가격부터 */}
-                {orderBook.bids.slice(0, 5).map((bid, i) => {
-                  const cumulative = orderBook.bids.slice(0, i + 1)
-                    .reduce((sum, b) => sum + b.volume, 0);
-                  return (
-                    <div key={`bid-${i}`} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '2px', padding: '2px 0' }}>
-                      <div style={{ color: '#02c076' }}>{formatNumber(bid.price)}</div>
-                      <div style={{ textAlign: 'right', color: '#ffffff' }}>{bid.volume.toFixed(6)}</div>
-                      <div style={{ textAlign: 'right', color: '#c7c9cb' }}>{cumulative.toFixed(6)}</div>
-                    </div>
-                  );
-                })}
+          {/* Order Book - Depth of Market */}
+          {orderBook || showMockData ? (
+            <DepthOfMarket
+              symbol="BTC-KRW"
+              bids={orderBook ? orderBook.bids.map(bid => [bid.price, bid.volume]) : mockOrderBook.bids.map(bid => [bid.price, bid.volume])}
+              asks={orderBook ? orderBook.asks.map(ask => [ask.price, ask.volume]) : mockOrderBook.asks.map(ask => [ask.price, ask.volume])}
+              depth={15}
+              onPriceClick={(price, side) => {
+                console.log(`🎯 DOM 가격 클릭: ${price} KRW (${side})`);
+                setOrderPrice(price.toString());
+                setOrderSide(side === 'bid' ? 'Buy' : 'Sell');
+                // 주문 폼으로 스크롤 (선택사항)
+                const orderForm = document.querySelector('[data-order-form]');
+                if (orderForm) {
+                  orderForm.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            />
+          ) : (
+            <div style={cardStyle}>
+              <div style={{ color: '#848e9c', textAlign: 'center', padding: '40px 20px' }}>
+                {loading ? '📊 호가창 데이터를 불러오는 중...' : '⚠️ 호가창 데이터를 불러올 수 없습니다.'}
               </div>
-            ) : (
-              <div style={{ color: '#848e9c', textAlign: 'center', padding: '20px 0' }}>
-                {loading ? '호가창 데이터를 불러오는 중...' : '호가창 데이터를 불러올 수 없습니다.'}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </main>
 
@@ -583,7 +585,7 @@ const SimpleApp: React.FC = () => {
           backgroundColor: '#1e2329',
           border: '1px solid #2b3139',
           borderRadius: '4px',
-          fontSize: '12px',
+          fontSize: '24px',
           color: loading ? '#ffa500' : error ? '#f84960' : '#02c076'
         }}>
           {loading ? '⏳ 데이터 로딩 중...' : error ? `❌ ${error}` : '✅ 백엔드 연결됨 (포트 7000)'}
