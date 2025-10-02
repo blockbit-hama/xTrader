@@ -46,7 +46,7 @@ impl MatchingEngine {
   }
   
   /// 매칭 엔진 실행 (주문 처리 루프)
-  pub fn run(&mut self, mut order_rx: Receiver<Order>) {
+  pub fn run(&mut self, order_rx: Receiver<Order>) {
     info!("매칭 엔진 시작");
     
     // 주문 수신 및 처리
@@ -69,7 +69,7 @@ impl MatchingEngine {
   }
 
   /// 시퀀서를 통한 매칭 엔진 실행 (순서 보장)
-  pub fn run_sequenced(&mut self, mut order_rx: Receiver<Order>) {
+  pub fn run_sequenced(&mut self, order_rx: Receiver<Order>) {
     info!("매칭 엔진 시작 (시퀀서 모드)");
     
     // 주문 수신 및 처리 (FIFO 순서 보장)

@@ -131,3 +131,11 @@ Cargo.lock
 *.pdb
 
 # End of https://www.toptal.com/developers/gitignore/api/clion,rust
+
+# Log files
+*.log
+logs/
+**/*.log
+
+# Playwright MCP
+.playwright-mcp/

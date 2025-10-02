@@ -71,7 +71,8 @@ impl MarketDataPublisher {
                     let interval_candles = symbol_candlesticks.entry("5m".to_string()).or_insert_with(Vec::new);
 
                     for i in 0..100 {
-                        let candle_time = base_time + (i * 5 * 60); // 5분 간격
+                        let open_time = base_time + (i * 5 * 60); // 5분 간격
+                        let close_time = open_time + (5 * 60); // 5분 후 종가 시간
                         let price_variance = ((i as f64 * 0.123).sin() * 0.02 + 1.0) as f64;
                         let adjusted_price = (base_price as f64 * price_variance) as u64;
 
@@ -82,8 +83,8 @@ impl MarketDataPublisher {
                         let volume = 50 + (i % 200) as u64;
 
                         let candle = CandlestickData {
-                            open_time: candle_time,
-                            close_time: candle_time,
+                            open_time,
+                            close_time,
                             open,
                             high,
                             low,

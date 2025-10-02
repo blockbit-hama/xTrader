@@ -70,7 +70,7 @@ pub struct CandleResponse {
 }
 
 /// 봉차트 데이터
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CandleData {
     pub open_time: u64,
     pub close_time: u64,
@@ -83,7 +83,7 @@ pub struct CandleData {
 }
 
 /// WebSocket 메시지 타입
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "type")]
 pub enum WebSocketMessage {
     /// 체결 결과
