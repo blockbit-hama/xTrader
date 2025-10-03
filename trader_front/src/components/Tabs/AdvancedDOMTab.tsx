@@ -95,10 +95,16 @@ const generateMockExecutions = (): Execution[] => {
     const timestamp = Date.now() - (i * 60000); // 1 minute intervals
     
     executions.push({
+      execution_id: `exec_${i}`,
+      order_id: `order_${i}`,
+      symbol: 'BTC-KRW',
       side,
       price,
       quantity,
-      timestamp: Math.floor(timestamp / 1000)
+      remaining_quantity: 0,
+      timestamp: Math.floor(timestamp / 1000),
+      counterparty_id: `user_${Math.floor(Math.random() * 100)}`,
+      is_maker: Math.random() > 0.5
     });
   }
   
@@ -115,7 +121,7 @@ const formatQuantity = (quantity: number): string => {
 };
 
 // Convert OrderBook to ProcessedOrderBook format
-const convertOrderBook = (orderBook: OrderBook | null): ProcessedOrderBook => {
+const convertOrderBook = (orderBook: OrderBook | null | undefined): ProcessedOrderBook => {
   if (!orderBook) {
     return generateMockOrderBook();
   }
