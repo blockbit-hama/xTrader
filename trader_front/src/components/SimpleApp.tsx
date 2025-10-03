@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTradingAPI } from '../hooks/useTradingAPI';
 import TradingViewChart from './TradingViewChart';
 import DepthOfMarket from './DepthOfMarket';
-import { generateCompleteDailyData } from '../utils/mockDataGenerator';
 
 const SimpleApp: React.FC = () => {
   const [balance] = useState({ BTC: 1.5, KRW: 50000000 });
@@ -50,8 +49,29 @@ const SimpleApp: React.FC = () => {
 
   const mockOrderBook = generateMockOrderBook();
 
-  // 하루치 모의 캔들 데이터 생성 (1440분 = 24시간)
-  const mockCandles = generateCompleteDailyData(currentPrice);
+  // Mock 캔들 데이터 (백엔드 연결 안될 때 테스트용)
+  const mockCandles = [
+    { open: 48000000, high: 51000000, low: 47000000, close: 50000000, volume: 150, open_time: Date.now() - 19 * 60 * 1000, close_time: Date.now() - 19 * 60 * 1000, trade_count: 45 },
+    { open: 50000000, high: 52000000, low: 49000000, close: 51000000, volume: 180, open_time: Date.now() - 18 * 60 * 1000, close_time: Date.now() - 18 * 60 * 1000, trade_count: 52 },
+    { open: 51000000, high: 53000000, low: 50000000, close: 49000000, volume: 120, open_time: Date.now() - 17 * 60 * 1000, close_time: Date.now() - 17 * 60 * 1000, trade_count: 38 },
+    { open: 49000000, high: 50000000, low: 47500000, close: 48500000, volume: 200, open_time: Date.now() - 16 * 60 * 1000, close_time: Date.now() - 16 * 60 * 1000, trade_count: 65 },
+    { open: 48500000, high: 51000000, low: 48000000, close: 50500000, volume: 160, open_time: Date.now() - 15 * 60 * 1000, close_time: Date.now() - 15 * 60 * 1000, trade_count: 48 },
+    { open: 50500000, high: 52500000, low: 50000000, close: 52000000, volume: 190, open_time: Date.now() - 14 * 60 * 1000, close_time: Date.now() - 14 * 60 * 1000, trade_count: 58 },
+    { open: 52000000, high: 53000000, low: 51000000, close: 51500000, volume: 140, open_time: Date.now() - 13 * 60 * 1000, close_time: Date.now() - 13 * 60 * 1000, trade_count: 42 },
+    { open: 51500000, high: 52000000, low: 49500000, close: 50000000, volume: 175, open_time: Date.now() - 12 * 60 * 1000, close_time: Date.now() - 12 * 60 * 1000, trade_count: 55 },
+    { open: 50000000, high: 51500000, low: 49000000, close: 51000000, volume: 185, open_time: Date.now() - 11 * 60 * 1000, close_time: Date.now() - 11 * 60 * 1000, trade_count: 60 },
+    { open: 51000000, high: 52000000, low: 50500000, close: 51800000, volume: 155, open_time: Date.now() - 10 * 60 * 1000, close_time: Date.now() - 10 * 60 * 1000, trade_count: 47 },
+    { open: 51800000, high: 53500000, low: 51000000, close: 52500000, volume: 195, open_time: Date.now() - 9 * 60 * 1000, close_time: Date.now() - 9 * 60 * 1000, trade_count: 62 },
+    { open: 52500000, high: 54000000, low: 52000000, close: 53000000, volume: 165, open_time: Date.now() - 8 * 60 * 1000, close_time: Date.now() - 8 * 60 * 1000, trade_count: 50 },
+    { open: 53000000, high: 53500000, low: 51500000, close: 52000000, volume: 145, open_time: Date.now() - 7 * 60 * 1000, close_time: Date.now() - 7 * 60 * 1000, trade_count: 44 },
+    { open: 52000000, high: 53000000, low: 51000000, close: 52800000, volume: 170, open_time: Date.now() - 6 * 60 * 1000, close_time: Date.now() - 6 * 60 * 1000, trade_count: 53 },
+    { open: 52800000, high: 54000000, low: 52500000, close: 53500000, volume: 180, open_time: Date.now() - 5 * 60 * 1000, close_time: Date.now() - 5 * 60 * 1000, trade_count: 57 },
+    { open: 53500000, high: 54500000, low: 53000000, close: 54000000, volume: 200, open_time: Date.now() - 4 * 60 * 1000, close_time: Date.now() - 4 * 60 * 1000, trade_count: 64 },
+    { open: 54000000, high: 54200000, low: 52500000, close: 53000000, volume: 160, open_time: Date.now() - 3 * 60 * 1000, close_time: Date.now() - 3 * 60 * 1000, trade_count: 49 },
+    { open: 53000000, high: 54000000, low: 52800000, close: 53800000, volume: 175, open_time: Date.now() - 2 * 60 * 1000, close_time: Date.now() - 2 * 60 * 1000, trade_count: 56 },
+    { open: 53800000, high: 55000000, low: 53500000, close: 54500000, volume: 190, open_time: Date.now() - 1 * 60 * 1000, close_time: Date.now() - 1 * 60 * 1000, trade_count: 61 },
+    { open: 54500000, high: 55500000, low: 54000000, close: 55000000, volume: 210, open_time: Date.now(), close_time: Date.now(), trade_count: 68 }
+  ];
 
   // 실제 데이터가 없을 때 mock 데이터 사용 (또는 타임아웃 시)
   const chartCandles = candles.length > 0 ? candles : (showMockData || !loading ? mockCandles : []);
