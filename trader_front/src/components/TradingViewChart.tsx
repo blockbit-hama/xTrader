@@ -116,10 +116,6 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
         type: 'volume',
       },
       priceScaleId: 'volume-scale',
-      scaleMargins: {
-        top: 0.8,
-        bottom: 0,
-      },
     });
 
     volumeSeriesRef.current = volumeSeries;
