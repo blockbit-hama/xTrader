@@ -347,8 +347,8 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
               {candles.length > 0 || mockCandles.length > 0 ? (
                 <TradingViewChart
                   data={candles.length > 0 ? candles : mockCandles}
-                  width={560}
-                  height={400}
+                  width={750}
+                  height={500}
                 />
               ) : (
                 <ChartPlaceholder>
@@ -680,16 +680,16 @@ const MainContent = styled.div`
 `;
 
 const LeftPanel = styled.div`
-  width: 600px;
+  flex: 2;
+  min-width: 800px;
   padding: 16px;
   border-right: 1px solid #e9ecef;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
 `;
 
 const CenterPanel = styled.div`
-  width: 400px;
+  width: 350px;
   padding: 16px;
   border-right: 1px solid #e9ecef;
   display: flex;
@@ -699,7 +699,7 @@ const CenterPanel = styled.div`
 `;
 
 const RightPanel = styled.div`
-  width: 320px;
+  width: 300px;
   padding: 16px;
   display: flex;
   flex-direction: column;
