@@ -58,14 +58,14 @@ const TabbedApp: React.FC = () => {
 
   const containerStyle: React.CSSProperties = {
     minHeight: '100vh',
-    backgroundColor: '#0c0f13',
-    color: '#ffffff',
+    backgroundColor: '#ffffff',
+    color: '#1a1a1a',
     fontFamily: 'Arial, sans-serif'
   };
 
   const headerStyle: React.CSSProperties = {
-    backgroundColor: '#161a20',
-    borderBottom: '1px solid #2b3139',
+    backgroundColor: '#f8f9fa',
+    borderBottom: '1px solid #e9ecef',
     padding: '16px 24px',
     display: 'flex',
     justifyContent: 'space-between',
@@ -75,20 +75,21 @@ const TabbedApp: React.FC = () => {
   const titleStyle: React.CSSProperties = {
     fontSize: '24px',
     fontWeight: 'bold',
-    color: '#3b82f6'
+    color: '#007bff'
   };
 
   const priceStyle: React.CSSProperties = {
     fontSize: '20px',
     fontWeight: 'bold',
-    color: '#02c076'
+    color: '#28a745'
   };
 
   const balanceStyle: React.CSSProperties = {
-    backgroundColor: '#1e2329',
+    backgroundColor: '#e9ecef',
     padding: '12px',
     borderRadius: '8px',
-    fontSize: '14px'
+    fontSize: '14px',
+    color: '#1a1a1a'
   };
 
   const mainStyle: React.CSSProperties = {
@@ -105,17 +106,18 @@ const TabbedApp: React.FC = () => {
   };
 
   const tabContainerStyle: React.CSSProperties = {
-    backgroundColor: '#161a20',
-    border: '1px solid #2b3139',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e9ecef',
     borderRadius: '8px',
     padding: '16px',
     flex: 1,
-    overflow: 'hidden'
+    overflow: 'hidden',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
   };
 
   const tabHeaderStyle: React.CSSProperties = {
     display: 'flex',
-    borderBottom: '1px solid #2b3139',
+    borderBottom: '1px solid #e9ecef',
     marginBottom: '16px',
     paddingBottom: '8px'
   };
@@ -124,7 +126,7 @@ const TabbedApp: React.FC = () => {
     padding: '8px 16px',
     border: 'none',
     background: 'transparent',
-    color: '#848e9c',
+    color: '#6c757d',
     cursor: 'pointer',
     borderBottom: '2px solid transparent',
     fontSize: '14px',
@@ -135,8 +137,8 @@ const TabbedApp: React.FC = () => {
 
   const activeTabButtonStyle: React.CSSProperties = {
     ...tabButtonStyle,
-    color: '#ffffff',
-    borderBottom: '2px solid #3b82f6'
+    color: '#1a1a1a',
+    borderBottom: '2px solid #007bff'
   };
 
   const tabContentStyle: React.CSSProperties = {
@@ -149,11 +151,11 @@ const TabbedApp: React.FC = () => {
     bottom: '16px',
     right: '16px',
     padding: '8px 12px',
-    backgroundColor: '#1e2329',
-    border: '1px solid #2b3139',
+    backgroundColor: '#f8f9fa',
+    border: '1px solid #e9ecef',
     borderRadius: '4px',
     fontSize: '12px',
-    color: loading ? '#ffa500' : error ? '#f84960' : '#02c076'
+    color: loading ? '#ffc107' : error ? '#dc3545' : '#28a745'
   };
 
   const tabs = [
@@ -230,16 +232,16 @@ const TabbedApp: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div>
             <h1 style={titleStyle}>📈 xTrader</h1>
-            <div style={{ fontSize: '12px', color: '#848e9c' }}>Professional Trading Platform</div>
+            <div style={{ fontSize: '12px', color: '#6c757d' }}>Professional Trading Platform</div>
           </div>
           <div>
-            <div style={{ fontSize: '12px', color: '#848e9c' }}>BTC-KRW</div>
+            <div style={{ fontSize: '12px', color: '#6c757d' }}>BTC-KRW</div>
             <div style={priceStyle}>
               {formatNumber(currentPrice)} KRW
               {statistics && (
                 <span style={{
                   fontSize: '14px',
-                  color: statistics.price_change_24h >= 0 ? '#02c076' : '#f84960',
+                  color: statistics.price_change_24h >= 0 ? '#28a745' : '#dc3545',
                   marginLeft: '12px'
                 }}>
                   {statistics.price_change_24h >= 0 ? '+' : ''}{(statistics.price_change_24h * 100).toFixed(2)}%

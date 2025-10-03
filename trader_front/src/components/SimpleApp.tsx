@@ -172,14 +172,14 @@ const SimpleApp: React.FC = () => {
 
   const containerStyle: React.CSSProperties = {
     minHeight: '100vh',
-    backgroundColor: '#0c0f13',
-    color: '#ffffff',
+    backgroundColor: '#ffffff',
+    color: '#1a1a1a',
     fontFamily: 'Arial, sans-serif'
   };
 
   const headerStyle: React.CSSProperties = {
-    backgroundColor: '#161a20',
-    borderBottom: '1px solid #2b3139',
+    backgroundColor: '#f8f9fa',
+    borderBottom: '1px solid #e9ecef',
     padding: '16px 24px',
     display: 'flex',
     justifyContent: 'space-between',
@@ -195,14 +195,15 @@ const SimpleApp: React.FC = () => {
   const priceStyle: React.CSSProperties = {
     fontSize: '40px',
     fontWeight: 'bold',
-    color: '#02c076'
+    color: '#28a745'
   };
 
   const balanceStyle: React.CSSProperties = {
-    backgroundColor: '#1e2329',
+    backgroundColor: '#e9ecef',
     padding: '12px',
     borderRadius: '8px',
-    fontSize: '28px'
+    fontSize: '28px',
+    color: '#1a1a1a'
   };
 
   const mainStyle: React.CSSProperties = {
@@ -218,15 +219,16 @@ const SimpleApp: React.FC = () => {
   const rightPanelStyle: React.CSSProperties = {
     width: '320px',
     padding: '16px',
-    borderLeft: '1px solid #2b3139'
+    borderLeft: '1px solid #e9ecef'
   };
 
   const cardStyle: React.CSSProperties = {
-    backgroundColor: '#161a20',
-    border: '1px solid #2b3139',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e9ecef',
     borderRadius: '8px',
     padding: '16px',
-    marginBottom: '16px'
+    marginBottom: '16px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
   };
 
   const chartPlaceholderStyle: React.CSSProperties = {
@@ -236,7 +238,7 @@ const SimpleApp: React.FC = () => {
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    color: '#848e9c'
+    color: '#6c757d'
   };
 
   const buttonStyle: React.CSSProperties = {
@@ -249,14 +251,14 @@ const SimpleApp: React.FC = () => {
 
   const buyButtonStyle: React.CSSProperties = {
     ...buttonStyle,
-    backgroundColor: '#02c076',
+    backgroundColor: '#28a745',
     color: 'white',
     marginRight: '8px'
   };
 
   const sellButtonStyle: React.CSSProperties = {
     ...buttonStyle,
-    backgroundColor: '#f84960',
+    backgroundColor: '#dc3545',
     color: 'white'
   };
 
@@ -264,7 +266,7 @@ const SimpleApp: React.FC = () => {
     padding: '8px 16px',
     border: 'none',
     background: 'transparent',
-    color: '#848e9c',
+    color: '#6c757d',
     cursor: 'pointer',
     borderBottom: '2px solid transparent',
     fontSize: '28px',
@@ -273,39 +275,42 @@ const SimpleApp: React.FC = () => {
 
   const activeTabButtonStyle: React.CSSProperties = {
     ...tabButtonStyle,
-    color: '#ffffff',
-    borderBottom: '2px solid #3b82f6'
+    color: '#1a1a1a',
+    borderBottom: '2px solid #007bff'
   };
 
   const orderTypeButtonStyle: React.CSSProperties = {
     ...buttonStyle,
-    backgroundColor: '#2b3139',
-    color: '#c7c9cb',
+    backgroundColor: '#f8f9fa',
+    color: '#6c757d',
     marginRight: '8px',
-    fontSize: '24px'
+    fontSize: '24px',
+    border: '1px solid #e9ecef'
   };
 
   const activeOrderTypeButtonStyle: React.CSSProperties = {
     ...orderTypeButtonStyle,
-    backgroundColor: '#3b82f6',
-    color: 'white'
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: '1px solid #007bff'
   };
 
   const disabledButtonStyle: React.CSSProperties = {
     ...buttonStyle,
-    backgroundColor: '#2b3139',
-    color: '#848e9c',
+    backgroundColor: '#f8f9fa',
+    color: '#6c757d',
     cursor: 'not-allowed',
-    opacity: 0.6
+    opacity: 0.6,
+    border: '1px solid #e9ecef'
   };
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '8px 12px',
-    backgroundColor: '#161a20',
-    border: '1px solid #2b3139',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e9ecef',
     borderRadius: '4px',
-    color: '#ffffff',
+    color: '#1a1a1a',
     marginBottom: '12px'
   };
 
@@ -320,16 +325,16 @@ const SimpleApp: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div>
             <h1 style={titleStyle}>📈 xTrader</h1>
-            <div style={{ fontSize: '24px', color: '#848e9c' }}>Professional Trading Platform</div>
+            <div style={{ fontSize: '24px', color: '#6c757d' }}>Professional Trading Platform</div>
           </div>
           <div>
-            <div style={{ fontSize: '24px', color: '#848e9c' }}>BTC-KRW</div>
+            <div style={{ fontSize: '24px', color: '#6c757d' }}>BTC-KRW</div>
             <div style={priceStyle}>
               {formatNumber(currentPrice)} KRW
               {displayStatistics && (
                 <span style={{
                   fontSize: '28px',
-                  color: displayStatistics.price_change_24h >= 0 ? '#02c076' : '#f84960',
+                  color: displayStatistics.price_change_24h >= 0 ? '#28a745' : '#dc3545',
                   marginLeft: '12px'
                 }}>
                   {displayStatistics.price_change_24h >= 0 ? '+' : ''}{(displayStatistics.price_change_24h * 100).toFixed(2)}%
@@ -352,8 +357,8 @@ const SimpleApp: React.FC = () => {
           {/* Chart */}
           <div style={{...cardStyle, padding: 0}}>
             <div style={{ padding: '16px 16px 8px 16px' }}>
-              <div style={{ fontSize: '36px', marginBottom: '8px', color: '#3b82f6' }}>📊 BTC-KRW 실시간 차트</div>
-              <div style={{ fontSize: '28px', color: candles.length > 0 ? '#02c076' : '#fbbf24', marginBottom: '8px' }}>
+              <div style={{ fontSize: '36px', marginBottom: '8px', color: '#007bff' }}>📊 BTC-KRW 실시간 차트</div>
+              <div style={{ fontSize: '28px', color: candles.length > 0 ? '#28a745' : '#ffc107', marginBottom: '8px' }}>
                 {loading && candles.length === 0 && !showMockData ? (
                   '⏳ 데이터 로딩 중...'
                 ) : candles.length > 0 ? (
@@ -378,19 +383,19 @@ const SimpleApp: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#848e9c'
+                color: '#6c757d'
               }}>
                 {loading && !showMockData ? '데이터 로딩 중...' : '차트 데이터를 불러오는 중...'}
               </div>
             )}
 
-            <div style={{ padding: '8px 16px 16px 16px', borderTop: '1px solid #2b3139' }}>
-              <div style={{ fontSize: '24px', color: '#848e9c' }}>
+            <div style={{ padding: '8px 16px 16px 16px', borderTop: '1px solid #e9ecef' }}>
+              <div style={{ fontSize: '24px', color: '#6c757d' }}>
                 고가: ₩{formatNumber(Math.max(...chartCandles.map(c => c.high || 0)))}<br/>
                 저가: ₩{formatNumber(Math.min(...chartCandles.map(c => c.low || 0)))}<br/>
                 거래량: {chartCandles.reduce((sum, c) => sum + (c.volume || 0), 0).toLocaleString()}
               </div>
-              <div style={{ fontSize: '20px', color: '#6b7280', marginTop: '8px' }}>
+              <div style={{ fontSize: '20px', color: '#6c757d', marginTop: '8px' }}>
                 {candles.length > 0 ? '🎯 TradingView 실시간 캔들스틱 차트' : '🧪 TradingView 테스트용 Mock 차트'}
               </div>
             </div>
@@ -406,22 +411,22 @@ const SimpleApp: React.FC = () => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     padding: '8px 0',
-                    borderBottom: index < 4 ? '1px solid #2b3139' : 'none',
+                    borderBottom: index < 4 ? '1px solid #e9ecef' : 'none',
                     fontSize: '24px'
                   }}>
-                    <span style={{ color: execution.side === 'Buy' ? '#02c076' : '#f84960' }}>
+                    <span style={{ color: execution.side === 'Buy' ? '#28a745' : '#dc3545' }}>
                       {execution.side === 'Buy' ? '매수' : '매도'}
                     </span>
                     <span>₩{formatNumber(execution.price)}</span>
                     <span>{execution.quantity}</span>
-                    <span style={{ color: '#848e9c' }}>
+                    <span style={{ color: '#6c757d' }}>
                       {new Date(execution.timestamp * 1000).toLocaleTimeString()}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ color: '#848e9c', textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ color: '#6c757d', textAlign: 'center', padding: '20px 0' }}>
                 {loading ? '체결 내역을 불러오는 중...' : '아직 체결된 거래가 없습니다.'}
               </div>
             )}
@@ -433,7 +438,7 @@ const SimpleApp: React.FC = () => {
           {/* Trading Form */}
           <div style={cardStyle} data-order-form>
             {/* 매수/매도 탭 */}
-            <div style={{ display: 'flex', marginBottom: '16px', borderBottom: '1px solid #2b3139' }}>
+            <div style={{ display: 'flex', marginBottom: '16px', borderBottom: '1px solid #e9ecef' }}>
               <button
                 style={orderSide === 'Buy' ? activeTabButtonStyle : tabButtonStyle}
                 onClick={() => setOrderSide('Buy')}
@@ -450,7 +455,7 @@ const SimpleApp: React.FC = () => {
 
             {/* 주문 타입 선택 */}
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ fontSize: '28px', color: '#c7c9cb', marginBottom: '8px' }}>주문 타입</div>
+              <div style={{ fontSize: '28px', color: '#1a1a1a', marginBottom: '8px' }}>주문 타입</div>
               <div style={{ display: 'flex' }}>
                 <button
                   style={orderType === 'Limit' ? activeOrderTypeButtonStyle : orderTypeButtonStyle}
@@ -470,7 +475,7 @@ const SimpleApp: React.FC = () => {
             {/* 가격 입력 (지정가일 때만) */}
             {orderType === 'Limit' && (
               <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '28px', color: '#c7c9cb', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontSize: '28px', color: '#1a1a1a', display: 'block', marginBottom: '4px' }}>
                   가격 (KRW)
                 </label>
                 <input
@@ -486,15 +491,15 @@ const SimpleApp: React.FC = () => {
             {/* 시장가 가격 표시 */}
             {orderType === 'Market' && (
               <div style={{ marginBottom: '12px' }}>
-                <div style={{ fontSize: '28px', color: '#c7c9cb', marginBottom: '4px' }}>
+                <div style={{ fontSize: '28px', color: '#1a1a1a', marginBottom: '4px' }}>
                   예상 체결가 (KRW)
                 </div>
                 <div style={{
                   padding: '8px 12px',
-                  backgroundColor: '#1e2329',
-                  border: '1px solid #2b3139',
+                  backgroundColor: '#f8f9fa',
+                  border: '1px solid #e9ecef',
                   borderRadius: '4px',
-                  color: orderSide === 'Buy' ? '#02c076' : '#f84960',
+                  color: orderSide === 'Buy' ? '#28a745' : '#dc3545',
                   fontWeight: 'bold'
                 }}>
                   ≈ {formatNumber(currentPrice)} KRW
@@ -504,7 +509,7 @@ const SimpleApp: React.FC = () => {
 
             {/* 수량 입력 */}
             <div style={{ marginBottom: '12px' }}>
-              <label style={{ fontSize: '28px', color: '#c7c9cb', display: 'block', marginBottom: '4px' }}>
+              <label style={{ fontSize: '28px', color: '#1a1a1a', display: 'block', marginBottom: '4px' }}>
                 수량 (BTC)
               </label>
               <input
@@ -519,18 +524,18 @@ const SimpleApp: React.FC = () => {
             </div>
 
             {/* 예상 총액 */}
-            <div style={{ marginBottom: '16px', padding: '8px', backgroundColor: '#1e2329', borderRadius: '4px' }}>
-              <div style={{ fontSize: '24px', color: '#c7c9cb' }}>
+            <div style={{ marginBottom: '16px', padding: '8px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+              <div style={{ fontSize: '24px', color: '#1a1a1a' }}>
                 예상 총액: {orderQuantity && parseFloat(orderQuantity) > 0 ?
                   `${formatNumber((parseFloat(orderQuantity) * (orderType === 'Market' ? currentPrice : parseFloat(orderPrice || '0'))))} KRW` :
                   '0 KRW'}
               </div>
-              <div style={{ fontSize: '24px', color: '#848e9c', marginTop: '4px' }}>
+              <div style={{ fontSize: '24px', color: '#6c757d', marginTop: '4px' }}>
                 수수료 (0.1%): {orderQuantity && parseFloat(orderQuantity) > 0 ?
                   `≈ ${formatNumber((parseFloat(orderQuantity) * (orderType === 'Market' ? currentPrice : parseFloat(orderPrice || '0')) * 0.001))} KRW` :
                   '0 KRW'}
               </div>
-              <div style={{ fontSize: '24px', color: '#848e9c', marginTop: '2px' }}>
+              <div style={{ fontSize: '24px', color: '#6c757d', marginTop: '2px' }}>
                 {orderSide === 'Buy' ? '필요 KRW: ' : '보유 BTC: '}
                 {orderSide === 'Buy' ? `${formatNumber(balance.KRW)} KRW` : `${balance.BTC} BTC`}
               </div>
@@ -570,7 +575,7 @@ const SimpleApp: React.FC = () => {
             />
           ) : (
             <div style={cardStyle}>
-              <div style={{ color: '#848e9c', textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ color: '#6c757d', textAlign: 'center', padding: '40px 20px' }}>
                 {loading ? '📊 호가창 데이터를 불러오는 중...' : '⚠️ 호가창 데이터를 불러올 수 없습니다.'}
               </div>
             </div>
@@ -582,11 +587,11 @@ const SimpleApp: React.FC = () => {
       <div style={{ position: 'fixed', bottom: '16px', right: '16px' }}>
         <div style={{
           padding: '8px 12px',
-          backgroundColor: '#1e2329',
-          border: '1px solid #2b3139',
+          backgroundColor: '#f8f9fa',
+          border: '1px solid #e9ecef',
           borderRadius: '4px',
           fontSize: '24px',
-          color: loading ? '#ffa500' : error ? '#f84960' : '#02c076'
+          color: loading ? '#ffc107' : error ? '#dc3545' : '#28a745'
         }}>
           {loading ? '⏳ 데이터 로딩 중...' : error ? `❌ ${error}` : '✅ 백엔드 연결됨 (포트 7000)'}
         </div>

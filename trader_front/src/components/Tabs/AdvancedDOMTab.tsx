@@ -582,8 +582,8 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #161a20;
-  color: #ffffff;
+  background: #ffffff;
+  color: #1a1a1a;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 `;
 
@@ -592,8 +592,8 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #2b3139;
-  background: #1e2329;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
   gap: 16px;
 `;
 
@@ -607,16 +607,16 @@ const StatusBadge = styled.span<{ type: 'live' | 'mock' }>`
   border-radius: 4px;
   font-size: 11px;
   font-weight: 500;
-  background: ${props => props.type === 'live' ? 'rgba(2, 192, 118, 0.2)' : 'rgba(255, 193, 7, 0.2)'};
-  color: ${props => props.type === 'live' ? '#02c076' : '#ffc107'};
-  border: 1px solid ${props => props.type === 'live' ? '#02c076' : '#ffc107'};
+  background: ${props => props.type === 'live' ? 'rgba(40, 167, 69, 0.2)' : 'rgba(255, 193, 7, 0.2)'};
+  color: ${props => props.type === 'live' ? '#28a745' : '#ffc107'};
+  border: 1px solid ${props => props.type === 'live' ? '#28a745' : '#ffc107'};
 `;
 
 const Title = styled.h2`
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #ffffff;
+  color: #1a1a1a;
 `;
 
 const Controls = styled.div`
@@ -633,15 +633,15 @@ const ControlGroup = styled.div`
 
 const Label = styled.span`
   font-size: 12px;
-  color: #848e9c;
+  color: #6c757d;
   font-weight: 500;
 `;
 
 const Select = styled.select`
-  background: #2b3139;
-  border: 1px solid #3b82f6;
+  background: #e9ecef;
+  border: 1px solid #007bff;
   border-radius: 4px;
-  color: #ffffff;
+  color: #1a1a1a;
   padding: 4px 8px;
   font-size: 12px;
   font-family: inherit;
@@ -652,7 +652,7 @@ const CheckboxLabel = styled.label`
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #848e9c;
+  color: #6c757d;
   cursor: pointer;
 `;
 
@@ -665,7 +665,7 @@ const MainContent = styled.div`
 const LeftPanel = styled.div`
   flex: 1;
   padding: 16px;
-  border-right: 1px solid #2b3139;
+  border-right: 1px solid #e9ecef;
   display: flex;
   flex-direction: column;
 `;
@@ -685,23 +685,23 @@ const RightPanel = styled.div`
   }
   
   &::-webkit-scrollbar-track {
-    background: #1e2329;
+    background: #f8f9fa;
     border-radius: 5px;
   }
   
   &::-webkit-scrollbar-thumb {
-    background: #3b82f6;
+    background: #007bff;
     border-radius: 5px;
   }
   
   &::-webkit-scrollbar-thumb:hover {
-    background: #60a5fa;
+    background: #0056b3;
   }
 `;
 
 const OrderBookSection = styled.div`
-  background: #1e2329;
-  border: 1px solid #2b3139;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
   border-radius: 8px;
   overflow: hidden;
   flex: 1;
@@ -720,30 +720,30 @@ const OrderBookContent = styled.div`
   }
   
   &::-webkit-scrollbar-track {
-    background: #1e2329;
+    background: #f8f9fa;
     border-radius: 3px;
   }
   
   &::-webkit-scrollbar-thumb {
-    background: #3b82f6;
+    background: #007bff;
     border-radius: 3px;
   }
   
   &::-webkit-scrollbar-thumb:hover {
-    background: #60a5fa;
+    background: #0056b3;
   }
 `;
 
 const SectionHeader = styled.div`
   padding: 12px 16px;
-  border-bottom: 1px solid #2b3139;
+  border-bottom: 1px solid #e9ecef;
 `;
 
 const SectionTitle = styled.h3`
   margin: 0 0 8px 0;
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: #1a1a1a;
 `;
 
 const MarketInfo = styled.div`
@@ -759,7 +759,7 @@ const InfoItem = styled.div`
 
 const InfoLabel = styled.span`
   font-size: 10px;
-  color: #848e9c;
+  color: #6c757d;
 `;
 
 const InfoValue = styled.span<{ type: 'bid' | 'ask' | 'spread' }>`
@@ -779,13 +779,13 @@ const DOMHeader = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   padding: 8px 16px;
-  background: #252525;
-  border-bottom: 1px solid #2b3139;
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
 `;
 
 const HeaderCell = styled.div<{ align: 'left' | 'center' | 'right' }>`
   font-size: 11px;
-  color: #848e9c;
+  color: #6c757d;
   font-weight: 600;
   text-transform: uppercase;
   text-align: ${props => props.align};
@@ -800,7 +800,7 @@ const DOMRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   min-height: 32px;
-  border-bottom: 1px solid #2b3139;
+  border-bottom: 1px solid #e9ecef;
   
   &:last-child {
     border-bottom: none;
@@ -821,8 +821,8 @@ const PriceCell = styled.div`
   align-items: center;
   justify-content: center;
   padding: 4px 8px;
-  border-left: 1px solid #2b3139;
-  border-right: 1px solid #2b3139;
+  border-left: 1px solid #e9ecef;
+  border-right: 1px solid #e9ecef;
   gap: 2px;
 `;
 
@@ -840,11 +840,11 @@ const BidRow = styled.div<{ selected?: boolean }>`
   padding: 4px 8px;
   cursor: pointer;
   border-radius: 4px;
-  background: ${props => props.selected ? 'rgba(2, 192, 118, 0.2)' : 'transparent'};
-  border: ${props => props.selected ? '1px solid #02c076' : '1px solid transparent'};
+  background: ${props => props.selected ? 'rgba(40, 167, 69, 0.2)' : 'transparent'};
+  border: ${props => props.selected ? '1px solid #28a745' : '1px solid transparent'};
   
   &:hover {
-    background: rgba(2, 192, 118, 0.1);
+    background: rgba(40, 167, 69, 0.1);
   }
 `;
 
@@ -854,11 +854,11 @@ const AskRow = styled.div<{ selected?: boolean }>`
   padding: 4px 8px;
   cursor: pointer;
   border-radius: 4px;
-  background: ${props => props.selected ? 'rgba(248, 73, 96, 0.2)' : 'transparent'};
-  border: ${props => props.selected ? '1px solid #f84960' : '1px solid transparent'};
+  background: ${props => props.selected ? 'rgba(220, 53, 69, 0.2)' : 'transparent'};
+  border: ${props => props.selected ? '1px solid #dc3545' : '1px solid transparent'};
   
   &:hover {
-    background: rgba(248, 73, 96, 0.1);
+    background: rgba(220, 53, 69, 0.1);
   }
 `;
 
@@ -885,7 +885,7 @@ const AskDepthBar = styled.div<{ width: number }>`
 `;
 
 const BidQuantity = styled.div`
-  color: #02c076;
+  color: #28a745;
   font-weight: 500;
   font-size: 12px;
   position: relative;
@@ -893,7 +893,7 @@ const BidQuantity = styled.div`
 `;
 
 const AskQuantity = styled.div`
-  color: #f84960;
+  color: #dc3545;
   font-weight: 500;
   font-size: 12px;
   position: relative;
@@ -901,30 +901,30 @@ const AskQuantity = styled.div`
 `;
 
 const BidPrice = styled.div<{ selected?: boolean }>`
-  color: #02c076;
+  color: #28a745;
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 2px;
-  background: ${props => props.selected ? 'rgba(2, 192, 118, 0.2)' : 'transparent'};
+  background: ${props => props.selected ? 'rgba(40, 167, 69, 0.2)' : 'transparent'};
   
   &:hover {
-    background: rgba(2, 192, 118, 0.1);
+    background: rgba(40, 167, 69, 0.1);
   }
 `;
 
 const AskPrice = styled.div<{ selected?: boolean }>`
-  color: #f84960;
+  color: #dc3545;
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 2px;
-  background: ${props => props.selected ? 'rgba(248, 73, 96, 0.2)' : 'transparent'};
+  background: ${props => props.selected ? 'rgba(220, 53, 69, 0.2)' : 'transparent'};
   
   &:hover {
-    background: rgba(248, 73, 96, 0.1);
+    background: rgba(220, 53, 69, 0.1);
   }
 `;
 
@@ -950,11 +950,11 @@ const OrderRow = styled.div<{ type: 'bid' | 'ask'; selected?: boolean }>`
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-left: ${props => props.selected ? '3px solid #3b82f6' : '3px solid transparent'};
-  background: ${props => props.selected ? 'rgba(59, 130, 246, 0.1)' : 'transparent'};
+  border-left: ${props => props.selected ? '3px solid #007bff' : '3px solid transparent'};
+  background: ${props => props.selected ? 'rgba(0, 123, 255, 0.1)' : 'transparent'};
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.05);
   }
 `;
 
@@ -973,7 +973,7 @@ const DepthBar = styled.div<{ type: 'bid' | 'ask'; width: number }>`
 `;
 
 const Cell = styled.div<{ type: 'bid' | 'ask' }>`
-  color: ${props => (props.type === 'bid' ? '#02c076' : '#f84960')};
+  color: ${props => (props.type === 'bid' ? '#28a745' : '#dc3545')};
   font-weight: 500;
   position: relative;
   z-index: 1;
@@ -982,41 +982,41 @@ const Cell = styled.div<{ type: 'bid' | 'ask' }>`
 const SpreadDivider = styled.div`
   padding: 12px 16px;
   text-align: center;
-  background: #252525;
-  border-top: 1px solid #2b3139;
-  border-bottom: 1px solid #2b3139;
+  background: #ffffff;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
 `;
 
 const SpreadLine = styled.div`
   height: 2px;
-  background: linear-gradient(90deg, #02c076 0%, #ffa500 50%, #f84960 100%);
+  background: linear-gradient(90deg, #28a745 0%, #ffc107 50%, #dc3545 100%);
   border-radius: 1px;
   margin-bottom: 8px;
 `;
 
 const SpreadText = styled.div`
   font-size: 11px;
-  color: #ffa500;
+  color: #ffc107;
   font-weight: 500;
 `;
 
 const ChartSection = styled.div`
-  background: #1e2329;
-  border: 1px solid #2b3139;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 16px;
   flex-shrink: 0;
 `;
 
 const ChartContainer = styled.div`
-  background: #0c0f13;
+  background: #ffffff;
   border-radius: 4px;
   padding: 8px;
 `;
 
 const OrderSection = styled.div`
-  background: #1e2329;
-  border: 1px solid #2b3139;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 16px;
   flex-shrink: 0;
@@ -1030,21 +1030,21 @@ const OrderForm = styled.div`
 
 const OrderInfo = styled.div`
   padding: 8px;
-  background: #252525;
+  background: #ffffff;
   border-radius: 4px;
-  border: 1px solid #2b3139;
+  border: 1px solid #e9ecef;
 `;
 
 const OrderLabel = styled.div`
   font-size: 11px;
-  color: #848e9c;
+  color: #6c757d;
   margin-bottom: 4px;
 `;
 
 const OrderValue = styled.div<{ type: 'bid' | 'ask' }>`
   font-size: 14px;
   font-weight: 600;
-  color: ${props => (props.type === 'bid' ? '#02c076' : '#f84960')};
+  color: ${props => (props.type === 'bid' ? '#28a745' : '#dc3545')};
 `;
 
 const FormGroup = styled.div`
@@ -1054,28 +1054,28 @@ const FormGroup = styled.div`
 `;
 
 const Input = styled.input`
-  background: #2b3139;
-  border: 1px solid #3b82f6;
+  background: #e9ecef;
+  border: 1px solid #007bff;
   border-radius: 4px;
-  color: #ffffff;
+  color: #1a1a1a;
   padding: 8px 12px;
   font-size: 12px;
   font-family: inherit;
 
   &:focus {
     outline: none;
-    border-color: #60a5fa;
+    border-color: #0056b3;
   }
 `;
 
 const TotalAmount = styled.div`
   font-size: 12px;
-  color: #ffffff;
+  color: #1a1a1a;
   font-weight: 500;
 `;
 
 const OrderButton = styled.button<{ type: 'bid' | 'ask' }>`
-  background: ${props => (props.type === 'bid' ? '#02c076' : '#f84960')};
+  background: ${props => (props.type === 'bid' ? '#28a745' : '#dc3545')};
   border: none;
   border-radius: 4px;
   color: white;
@@ -1086,27 +1086,27 @@ const OrderButton = styled.button<{ type: 'bid' | 'ask' }>`
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${props => (props.type === 'bid' ? '#02a066' : '#d63d4a')};
+    background: ${props => (props.type === 'bid' ? '#1e7e34' : '#c82333')};
     transform: translateY(-1px);
   }
 
   &:disabled {
-    background: #2b3139;
-    color: #848e9c;
+    background: #e9ecef;
+    color: #6c757d;
     cursor: not-allowed;
   }
 `;
 
 const NoSelection = styled.div`
   text-align: center;
-  color: #848e9c;
+  color: #6c757d;
   font-size: 12px;
   padding: 20px;
 `;
 
 const ExecutionsSection = styled.div`
-  background: #1e2329;
-  border: 1px solid #2b3139;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 16px;
   flex: 1;
@@ -1129,17 +1129,17 @@ const ExecutionsList = styled.div`
   }
   
   &::-webkit-scrollbar-track {
-    background: #1e2329;
+    background: #f8f9fa;
     border-radius: 3px;
   }
   
   &::-webkit-scrollbar-thumb {
-    background: #3b82f6;
+    background: #007bff;
     border-radius: 3px;
   }
   
   &::-webkit-scrollbar-thumb:hover {
-    background: #60a5fa;
+    background: #0056b3;
   }
 `;
 
@@ -1148,7 +1148,7 @@ const ExecutionRow = styled.div`
   grid-template-columns: 1fr 1fr 1fr 1fr;
   padding: 6px 0;
   font-size: 11px;
-  border-bottom: 1px solid #2b3139;
+  border-bottom: 1px solid #e9ecef;
 
   &:last-child {
     border-bottom: none;
@@ -1161,7 +1161,7 @@ const ExecutionSide = styled.div<{ type: 'Buy' | 'Sell' }>`
 `;
 
 const ExecutionPrice = styled.div`
-  color: #ffffff;
+  color: #1a1a1a;
   font-weight: 500;
 `;
 
@@ -1170,7 +1170,7 @@ const ExecutionQuantity = styled.div`
 `;
 
 const ExecutionTime = styled.div`
-  color: #848e9c;
+  color: #6c757d;
   font-size: 10px;
 `;
 
@@ -1179,6 +1179,6 @@ const LoadingMessage = styled.div`
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: #848e9c;
+  color: #6c757d;
   font-size: 14px;
 `;
