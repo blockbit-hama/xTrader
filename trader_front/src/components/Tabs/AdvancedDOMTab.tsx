@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { OrderBook, MarketStatistics, Execution } from '../../types/trading';
+import TradingViewChart from '../TradingViewChart';
 
 interface AdvancedDOMTabProps {
   orderBook: OrderBook | null;
@@ -10,6 +11,9 @@ interface AdvancedDOMTabProps {
   balance: { BTC: number; KRW: number };
   onSubmitOrder: (orderData: any) => Promise<any>;
   onPriceClick?: (price: number, side: 'bid' | 'ask') => void;
+  candles?: any[];
+  showMockData?: boolean;
+  mockCandles?: any[];
 }
 
 interface OrderLevel {
@@ -35,6 +39,9 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
   balance,
   onSubmitOrder,
   onPriceClick,
+  candles = [],
+  showMockData = true,
+  mockCandles = [],
 }) => {
   const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
   const [selectedSide, setSelectedSide] = useState<'bid' | 'ask' | null>(null);
@@ -328,8 +335,30 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
       </Header>
 
       <MainContent>
-        {/* Left Panel - Order Book */}
+        {/* Left Panel - Chart */}
         <LeftPanel>
+          <ChartSection>
+            <SectionHeader>
+              <SectionTitle>📈 실시간 차트</SectionTitle>
+            </SectionHeader>
+            <ChartContainer>
+              {candles.length > 0 || mockCandles.length > 0 ? (
+                <TradingViewChart
+                  data={candles.length > 0 ? candles : mockCandles}
+                  width={400}
+                  height={300}
+                />
+              ) : (
+                <ChartPlaceholder>
+                  {loading ? '차트 데이터 로딩 중...' : '차트 데이터를 불러올 수 없습니다.'}
+                </ChartPlaceholder>
+              )}
+            </ChartContainer>
+          </ChartSection>
+        </LeftPanel>
+
+        {/* Center Panel - Order Book */}
+        <CenterPanel>
           <OrderBookSection>
             <SectionHeader>
               <SectionTitle>📊 실시간 호가창</SectionTitle>
@@ -472,7 +501,11 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
             </ChartSection>
           )}
 
-          {/* Order Management */}
+        </CenterPanel>
+
+        {/* Right Panel - Quick Order & Executions */}
+        <RightPanel>
+          {/* Quick Order Section */}
           <OrderSection>
             <SectionTitle>⚡ 빠른 주문</SectionTitle>
             {selectedPrice && selectedSide ? (
@@ -660,24 +693,35 @@ const MainContent = styled.div`
   display: flex;
   flex: 1;
   overflow: hidden;
+  gap: 16px;
 `;
 
 const LeftPanel = styled.div`
+  width: 400px;
+  padding: 16px;
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+`;
+
+const CenterPanel = styled.div`
   flex: 1;
   padding: 16px;
   border-right: 1px solid #e9ecef;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 `;
 
 const RightPanel = styled.div`
-  width: 400px;
+  width: 320px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
-  height: calc(100vh - 40px);
+  flex-shrink: 0;
   
   /* Custom scrollbar styling */
   &::-webkit-scrollbar {
@@ -697,6 +741,35 @@ const RightPanel = styled.div`
   &::-webkit-scrollbar-thumb:hover {
     background: #0056b3;
   }
+`;
+
+const ChartSection = styled.div`
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+`;
+
+const ChartContainer = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  min-height: 300px;
+`;
+
+const ChartPlaceholder = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6c757d;
+  font-size: 14px;
 `;
 
 const OrderBookSection = styled.div`

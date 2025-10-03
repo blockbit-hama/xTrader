@@ -198,6 +198,9 @@ const TabbedApp: React.FC = () => {
             loading={loading}
             balance={balance}
             onSubmitOrder={submitOrder}
+            candles={candles}
+            showMockData={showMockData}
+            mockCandles={mockCandles}
             onPriceClick={(price: number, side: 'bid' | 'ask') => {
               console.log(`🎯 고급 DOM 가격 클릭: ${price} KRW (${side})`);
             }}
