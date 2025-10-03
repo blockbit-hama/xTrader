@@ -355,7 +355,7 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
                 <TradingViewChart
                   data={candles.length > 0 ? candles : mockCandles}
                   width={750}
-                  height={500}
+                  height={600}
                 />
               ) : (
                 <ChartPlaceholder>
