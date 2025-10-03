@@ -38,7 +38,6 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candlestickSeriesRef = useRef<any>(null);
-  const volumeSeriesRef = useRef<any>(null);
   const indicatorSeriesRef = useRef<Map<string, any>>(new Map());
 
   useEffect(() => {
@@ -109,32 +108,13 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
     candlestickSeriesRef.current = candlestickSeries;
 
-    // 볼륨 바 시리즈 추가
-    const volumeSeries = chart.addHistogramSeries({
-      color: '#26a69a',
-      priceFormat: {
-        type: 'volume',
-      },
-      priceScaleId: 'volume-scale',
-    });
-
-    volumeSeriesRef.current = volumeSeries;
-
-    // 볼륨 스케일 설정
-    chart.priceScale('volume-scale').applyOptions({
-      scaleMargins: {
-        top: 0.8,
-        bottom: 0,
-      },
-    });
-
     return () => {
       chart.remove();
     };
   }, [width, height]);
 
   useEffect(() => {
-    if (!candlestickSeriesRef.current || !volumeSeriesRef.current || !data.length) return;
+    if (!candlestickSeriesRef.current || !data.length) return;
 
     // 데이터를 TradingView 형식으로 변환
     const formattedData = data
@@ -153,24 +133,9 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
         return candle.time !== array[index - 1].time;
       });
 
-    // 볼륨 데이터 변환
-    const volumeData = data
-      .map((candle) => ({
-        time: Math.floor(candle.open_time / 1000) as any,
-        value: candle.volume,
-        color: candle.close >= candle.open ? '#28a745' : '#dc3545', // 상승/하락에 따른 색상
-      }))
-      .sort((a, b) => a.time - b.time)
-      .filter((volume, index, array) => {
-        if (index === 0) return true;
-        return volume.time !== array[index - 1].time;
-      });
-
     console.log('📊 TradingView 차트 데이터 (정렬/중복제거):', formattedData.slice(0, 3));
-    console.log('📊 볼륨 데이터:', volumeData.slice(0, 3));
 
     candlestickSeriesRef.current.setData(formattedData);
-    volumeSeriesRef.current.setData(volumeData);
   }, [data]);
 
   // 차트 크기 조정
