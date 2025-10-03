@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { OrderBook, MarketStatistics, Execution } from '../../types/trading';
 import TradingViewChart from '../TradingViewChart';
+import TechnicalIndicatorControls from '../TechnicalIndicatorControls';
 
 interface AdvancedDOMTabProps {
   orderBook: OrderBook | null;
@@ -47,6 +48,7 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
   const [selectedSide, setSelectedSide] = useState<'bid' | 'ask' | null>(null);
   const [orderQuantity, setOrderQuantity] = useState<string>('');
   const [orderType, setOrderType] = useState<'Market' | 'Limit'>('Limit');
+  const [enabledIndicators, setEnabledIndicators] = useState<Set<string>>(new Set());
   const [showVolumeProfile, setShowVolumeProfile] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(true);
   const [depthLevels, setDepthLevels] = useState(20);
@@ -276,6 +278,16 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
     }
   };
 
+  const handleToggleIndicator = (indicator: string, enabled: boolean) => {
+    const newIndicators = new Set(enabledIndicators);
+    if (enabled) {
+      newIndicators.add(indicator);
+    } else {
+      newIndicators.delete(indicator);
+    }
+    setEnabledIndicators(newIndicators);
+  };
+
   // Always show the component since we have mock data available
   // No loading state needed as we can always display demo data
   
@@ -350,12 +362,20 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
             <SectionHeader>
               <SectionTitle>📈 실시간 차트</SectionTitle>
             </SectionHeader>
+            
+            {/* 기술적 지표 컨트롤 */}
+            <TechnicalIndicatorControls
+              onToggleIndicator={handleToggleIndicator}
+              enabledIndicators={enabledIndicators}
+            />
+            
             <ChartContainer>
               {candles.length > 0 || mockCandles.length > 0 ? (
                 <TradingViewChart
                   data={candles.length > 0 ? candles : mockCandles}
                   width={750}
                   height={600}
+                  enabledIndicators={enabledIndicators}
                 />
               ) : (
                 <ChartPlaceholder>
