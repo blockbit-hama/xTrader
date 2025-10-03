@@ -745,3 +745,746 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
 };
 
 export default AdvancedDOMTab;
+
+// Styled Components
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+  gap: 16px;
+`;
+
+const DataStatus = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const StatusBadge = styled.span<{ type: 'live' | 'mock' }>`
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: ${props => props.type === 'live' ? 'rgba(40, 167, 69, 0.2)' : 'rgba(255, 193, 7, 0.2)'};
+  color: ${props => props.type === 'live' ? '#28a745' : '#ffc107'};
+  border: 1px solid ${props => props.type === 'live' ? '#28a745' : '#ffc107'};
+`;
+
+const Title = styled.h2`
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+`;
+
+const Controls = styled.div`
+  display: flex;
+  gap: 16px;
+  align-items: center;
+`;
+
+const ControlGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const Label = styled.span`
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+`;
+
+const Select = styled.select`
+  background: #e9ecef;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  color: #1a1a1a;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: inherit;
+`;
+
+const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6c757d;
+  cursor: pointer;
+`;
+
+const MainContent = styled.div`
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 16px;
+`;
+
+const LeftPanel = styled.div`
+  flex: 2;
+  min-width: 800px;
+  padding: 16px;
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+`;
+
+const CenterPanel = styled.div`
+  width: 350px;
+  padding: 16px;
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+`;
+
+const RightPanel = styled.div`
+  width: 300px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  
+  /* Custom scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 5px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #007bff;
+    border-radius: 5px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+  }
+`;
+
+const ChartSection = styled.div`
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+`;
+
+const ChartContainer = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  min-height: 300px;
+`;
+
+const ChartPlaceholder = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6c757d;
+  font-size: 14px;
+`;
+
+const OrderBookSection = styled.div`
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for flex child to shrink */
+`;
+
+const OrderBookContent = styled.div`
+  overflow-y: auto;
+  flex: 1;
+  
+  /* Custom scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #007bff;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+  }
+`;
+
+const SectionHeader = styled.div`
+  padding: 12px 16px;
+  border-bottom: 1px solid #e9ecef;
+`;
+
+const SectionTitle = styled.h3`
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+`;
+
+const MarketInfo = styled.div`
+  display: flex;
+  gap: 16px;
+`;
+
+const InfoItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const InfoLabel = styled.span`
+  font-size: 10px;
+  color: #6c757d;
+`;
+
+const InfoValue = styled.span<{ type: 'bid' | 'ask' | 'spread' }>`
+  font-size: 12px;
+  font-weight: 600;
+  color: ${props => {
+    switch (props.type) {
+      case 'bid': return '#02c076';
+      case 'ask': return '#f84960';
+      case 'spread': return '#ffa500';
+      default: return '#ffffff';
+    }
+  }};
+`;
+
+const DOMHeader = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 8px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+`;
+
+const HeaderCell = styled.div<{ align: 'left' | 'center' | 'right' }>`
+  font-size: 11px;
+  color: #6c757d;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: ${props => props.align};
+`;
+
+const DOMRows = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const DOMRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  min-height: 32px;
+  border-bottom: 1px solid #e9ecef;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const BidCell = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 4px 8px;
+  position: relative;
+`;
+
+const PriceCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-left: 1px solid #e9ecef;
+  border-right: 1px solid #e9ecef;
+  gap: 2px;
+`;
+
+const AskCell = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px 8px;
+  position: relative;
+`;
+
+const BidRow = styled.div<{ selected?: boolean }>`
+  position: relative;
+  width: 100%;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  background: ${props => props.selected ? 'rgba(40, 167, 69, 0.2)' : 'transparent'};
+  border: ${props => props.selected ? '1px solid #28a745' : '1px solid transparent'};
+  
+  &:hover {
+    background: rgba(40, 167, 69, 0.1);
+  }
+`;
+
+const AskRow = styled.div<{ selected?: boolean }>`
+  position: relative;
+  width: 100%;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  background: ${props => props.selected ? 'rgba(220, 53, 69, 0.2)' : 'transparent'};
+  border: ${props => props.selected ? '1px solid #dc3545' : '1px solid transparent'};
+  
+  &:hover {
+    background: rgba(220, 53, 69, 0.1);
+  }
+`;
+
+const BidDepthBar = styled.div<{ width: number }>`
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: ${props => props.width}%;
+  background: linear-gradient(90deg, rgba(2, 192, 118, 0.2) 0%, rgba(2, 192, 118, 0.05) 100%);
+  border-radius: 4px;
+  pointer-events: none;
+`;
+
+const AskDepthBar = styled.div<{ width: number }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: ${props => props.width}%;
+  background: linear-gradient(90deg, rgba(248, 73, 96, 0.2) 0%, rgba(248, 73, 96, 0.05) 100%);
+  border-radius: 4px;
+  pointer-events: none;
+`;
+
+const BidQuantity = styled.div`
+  color: #28a745;
+  font-weight: 500;
+  font-size: 12px;
+  position: relative;
+  z-index: 1;
+`;
+
+const AskQuantity = styled.div`
+  color: #dc3545;
+  font-weight: 500;
+  font-size: 12px;
+  position: relative;
+  z-index: 1;
+`;
+
+const BidPrice = styled.div<{ selected?: boolean }>`
+  color: #28a745;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background: ${props => props.selected ? 'rgba(40, 167, 69, 0.2)' : 'transparent'};
+  
+  &:hover {
+    background: rgba(40, 167, 69, 0.1);
+  }
+`;
+
+const AskPrice = styled.div<{ selected?: boolean }>`
+  color: #dc3545;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background: ${props => props.selected ? 'rgba(220, 53, 69, 0.2)' : 'transparent'};
+  
+  &:hover {
+    background: rgba(220, 53, 69, 0.1);
+  }
+`;
+
+const EmptyCell = styled.div`
+  height: 24px;
+`;
+
+const AskSection = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const BidSection = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const OrderRow = styled.div<{ type: 'bid' | 'ask'; selected?: boolean }>`
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding: 6px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: ${props => props.selected ? '3px solid #007bff' : '3px solid transparent'};
+  background: ${props => props.selected ? 'rgba(0, 123, 255, 0.1)' : 'transparent'};
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+`;
+
+const DepthBar = styled.div<{ type: 'bid' | 'ask'; width: number }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: ${props => props.width}%;
+  background: ${props =>
+    props.type === 'bid'
+      ? 'linear-gradient(90deg, rgba(2, 192, 118, 0.2) 0%, rgba(2, 192, 118, 0.05) 100%)'
+      : 'linear-gradient(90deg, rgba(248, 73, 96, 0.2) 0%, rgba(248, 73, 96, 0.05) 100%)'};
+  transition: width 0.3s ease;
+  pointer-events: none;
+`;
+
+const Cell = styled.div<{ type: 'bid' | 'ask' }>`
+  color: ${props => (props.type === 'bid' ? '#28a745' : '#dc3545')};
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+`;
+
+const SpreadDivider = styled.div`
+  padding: 12px 16px;
+  text-align: center;
+  background: #ffffff;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+`;
+
+const SpreadLine = styled.div`
+  height: 2px;
+  background: linear-gradient(90deg, #28a745 0%, #ffc107 50%, #dc3545 100%);
+  border-radius: 1px;
+  margin-bottom: 8px;
+`;
+
+const SpreadText = styled.div`
+  font-size: 11px;
+  color: #ffc107;
+  font-weight: 500;
+`;
+
+
+const OrderSection = styled.div`
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  flex-shrink: 0;
+`;
+
+const OrderForm = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const OrderInfo = styled.div`
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+`;
+
+const OrderLabel = styled.div`
+  font-size: 11px;
+  color: #6c757d;
+  margin-bottom: 4px;
+`;
+
+const OrderValue = styled.div<{ type: 'bid' | 'ask' }>`
+  font-size: 14px;
+  font-weight: 600;
+  color: ${props => (props.type === 'bid' ? '#28a745' : '#dc3545')};
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const Input = styled.input`
+  background: #e9ecef;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  color: #1a1a1a;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: #0056b3;
+  }
+`;
+
+const TotalAmount = styled.div`
+  font-size: 12px;
+  color: #1a1a1a;
+  font-weight: 500;
+`;
+
+const OrderButton = styled.button<{ type: 'bid' | 'ask' }>`
+  background: ${props => (props.type === 'bid' ? '#28a745' : '#dc3545')};
+  border: none;
+  border-radius: 4px;
+  color: white;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${props => (props.type === 'bid' ? '#1e7e34' : '#c82333')};
+    transform: translateY(-1px);
+  }
+`;
+
+// 알림 박스 스타일
+const NotificationContainer = styled.div`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const NotificationBox = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  background: ${props => {
+    switch (props.type) {
+      case 'success': return '#d4edda';
+      case 'error': return '#f8d7da';
+      case 'info': return '#d1ecf1';
+      default: return '#f8f9fa';
+    }
+  }};
+  border: 1px solid ${props => {
+    switch (props.type) {
+      case 'success': return '#c3e6cb';
+      case 'error': return '#f5c6cb';
+      case 'info': return '#bee5eb';
+      default: return '#dee2e6';
+    }
+  }};
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+`;
+
+const NotificationHeader = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+`;
+
+const NotificationIcon = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  font-size: 16px;
+  color: ${props => {
+    switch (props.type) {
+      case 'success': return '#155724';
+      case 'error': return '#721c24';
+      case 'info': return '#0c5460';
+      default: return '#495057';
+    }
+  }};
+`;
+
+const NotificationTitle = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  font-weight: 600;
+  font-size: 14px;
+  color: ${props => {
+    switch (props.type) {
+      case 'success': return '#155724';
+      case 'error': return '#721c24';
+      case 'info': return '#0c5460';
+      default: return '#495057';
+    }
+  }};
+`;
+
+const NotificationMessage = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  font-size: 13px;
+  color: ${props => {
+    switch (props.type) {
+      case 'success': return '#155724';
+      case 'error': return '#721c24';
+      case 'info': return '#0c5460';
+      default: return '#495057';
+    }
+  }};
+  white-space: pre-line;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  color: #6c757d;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  
+  &:hover {
+    color: #495057;
+  }
+`;
+
+  &:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+`;
+
+const NoSelection = styled.div`
+  text-align: center;
+  color: #6c757d;
+  font-size: 12px;
+  padding: 20px;
+`;
+
+const ExecutionsSection = styled.div`
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 500px; /* Much larger minimum height */
+  max-height: 800px; /* Much larger maximum height */
+`;
+
+const ExecutionsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  flex: 1;
+  
+  /* Custom scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #007bff;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+  }
+`;
+
+const ExecutionRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding: 6px 0;
+  font-size: 11px;
+  border-bottom: 1px solid #e9ecef;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ExecutionSide = styled.div<{ type: 'Buy' | 'Sell' }>`
+  color: ${props => (props.type === 'Buy' ? '#02c076' : '#f84960')};
+  font-weight: 500;
+`;
+
+const ExecutionPrice = styled.div`
+  color: #1a1a1a;
+  font-weight: 500;
+`;
+
+const ExecutionQuantity = styled.div`
+  color: #c7c9cb;
+`;
+
+const ExecutionTime = styled.div`
+  color: #6c757d;
+  font-size: 10px;
+`;
+
+const LoadingMessage = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #6c757d;
+  font-size: 14px;
+`;
+
+export default AdvancedDOMTab;
