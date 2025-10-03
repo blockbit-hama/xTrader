@@ -277,7 +277,9 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
     hasOrderBook: !!orderBook,
     hasStatistics: !!statistics,
     executionsCount: executions.length,
-    mockOrderBook: mockOrderBook.symbol
+    mockOrderBook: mockOrderBook.symbol,
+    candlesCount: candles.length,
+    mockCandlesCount: mockCandles.length
   });
 
   return (
@@ -345,8 +347,8 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
               {candles.length > 0 || mockCandles.length > 0 ? (
                 <TradingViewChart
                   data={candles.length > 0 ? candles : mockCandles}
-                  width={400}
-                  height={300}
+                  width={560}
+                  height={400}
                 />
               ) : (
                 <ChartPlaceholder>
@@ -482,25 +484,6 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
               </DOMRows>
             </OrderBookContent>
           </OrderBookSection>
-        </LeftPanel>
-
-        {/* Right Panel - Charts and Order Management */}
-        <RightPanel>
-          {/* Market Depth Chart */}
-          {showVolumeProfile && (
-            <ChartSection>
-              <SectionTitle>📈 시장 깊이 차트</SectionTitle>
-              <ChartContainer>
-                <canvas
-                  ref={canvasRef}
-                  width={400}
-                  height={200}
-                  style={{ width: '100%', height: '200px' }}
-                />
-              </ChartContainer>
-            </ChartSection>
-          )}
-
         </CenterPanel>
 
         {/* Right Panel - Quick Order & Executions */}
@@ -697,7 +680,7 @@ const MainContent = styled.div`
 `;
 
 const LeftPanel = styled.div`
-  width: 400px;
+  width: 600px;
   padding: 16px;
   border-right: 1px solid #e9ecef;
   display: flex;
@@ -706,12 +689,13 @@ const LeftPanel = styled.div`
 `;
 
 const CenterPanel = styled.div`
-  flex: 1;
+  width: 400px;
   padding: 16px;
   border-right: 1px solid #e9ecef;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  flex-shrink: 0;
 `;
 
 const RightPanel = styled.div`
@@ -1073,19 +1057,6 @@ const SpreadText = styled.div`
   font-weight: 500;
 `;
 
-const ChartSection = styled.div`
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 16px;
-  flex-shrink: 0;
-`;
-
-const ChartContainer = styled.div`
-  background: #ffffff;
-  border-radius: 4px;
-  padding: 8px;
-`;
 
 const OrderSection = styled.div`
   background: #f8f9fa;

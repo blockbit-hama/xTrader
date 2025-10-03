@@ -33,21 +33,21 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
     // 차트 생성
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: '#1e1e1e' },
-        textColor: '#ffffff',
+        background: { type: ColorType.Solid, color: '#ffffff' },
+        textColor: '#1a1a1a',
       },
       grid: {
-        vertLines: { color: '#2b3139' },
-        horzLines: { color: '#2b3139' },
+        vertLines: { color: '#e9ecef' },
+        horzLines: { color: '#e9ecef' },
       },
       crosshair: {
         mode: 1,
       },
       rightPriceScale: {
-        borderColor: '#2b3139',
+        borderColor: '#e9ecef',
       },
       timeScale: {
-        borderColor: '#2b3139',
+        borderColor: '#e9ecef',
         timeVisible: true,
         secondsVisible: false,
       },
@@ -59,12 +59,12 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
     // 캔들스틱 시리즈 추가 (v4.x 방식)
     const candlestickSeries = (chart as any).addCandlestickSeries({
-      upColor: '#02c076',
-      downColor: '#f84960',
-      borderDownColor: '#f84960',
-      borderUpColor: '#02c076',
-      wickDownColor: '#f84960',
-      wickUpColor: '#02c076',
+      upColor: '#28a745',
+      downColor: '#dc3545',
+      borderDownColor: '#dc3545',
+      borderUpColor: '#28a745',
+      wickDownColor: '#dc3545',
+      wickUpColor: '#28a745',
     });
 
     candlestickSeriesRef.current = candlestickSeries;
