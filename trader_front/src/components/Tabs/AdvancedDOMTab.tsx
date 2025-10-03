@@ -30,12 +30,15 @@ interface Statistics {
 }
 
 interface CandleData {
-  time: number;
+  time?: number;
   open: number;
   high: number;
   low: number;
   close: number;
   volume: number;
+  open_time?: number;
+  close_time?: number;
+  trade_count?: number;
 }
 
 interface Notification {
@@ -51,8 +54,8 @@ interface UserBalance {
 }
 
 interface AdvancedDOMTabProps {
-  orderBook?: OrderBook;
-  statistics?: Statistics;
+  orderBook?: OrderBook | null;
+  statistics?: Statistics | null;
   executions: Execution[];
   loading: boolean;
   balance: UserBalance;
@@ -122,6 +125,18 @@ const formatPrice = (price: number): string => {
 
 const formatQuantity = (quantity: number): string => {
   return quantity.toFixed(6);
+};
+
+// Convert candle data to TradingViewChart format
+const convertCandleData = (candles: CandleData[]) => {
+  return candles.map(candle => ({
+    time: candle.time || candle.open_time || Date.now(),
+    open: candle.open,
+    high: candle.high,
+    low: candle.low,
+    close: candle.close,
+    volume: candle.volume
+  }));
 };
 
 // Main Component
@@ -381,7 +396,7 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
               <ChartContainer>
                 {candles.length > 0 || mockCandles.length > 0 ? (
                   <TradingViewChart
-                    data={candles.length > 0 ? candles : mockCandles}
+                    data={convertCandleData(candles.length > 0 ? candles : mockCandles)}
                     width={750}
                     height={600}
                     enabledIndicators={enabledIndicators}
