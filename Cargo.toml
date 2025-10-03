@@ -31,6 +31,9 @@ thiserror = "1.0"
 anyhow = "1.0"  # 오류 처리 단순화
 dotenv = "0.15"  # 환경 변수 로드
 
+# 데이터베이스 (SQLite)
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "sqlite", "uuid", "chrono"] }
+
 # 테스트 및 벤치마킹
 criterion = { version = "0.4", optional = true }
 
@@ -39,6 +42,8 @@ criterion = { version = "0.4", optional = true }
 reqwest = { version = "0.11", features = ["json"] }
 url = "2.3"
 rand = "0.8"  # 무작위 주문 생성용
+tokio-tungstenite = "0.18"
+futures-util = "0.3"
 
 [features]
 default = []

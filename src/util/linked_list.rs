@@ -120,6 +120,7 @@ impl<T> DoublyLinkedList<T> {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use std::sync::Arc;
   
   #[test]
   fn test_new_list_is_empty() {
@@ -141,29 +142,29 @@ mod tests {
     
     // 두 번째 노드 추가
     let node2 = list.push_back(20);
-    assert_eq!(node2.borrow().value, 20);
+    assert_eq!(node2.lock().unwrap().value, 20);
     assert_eq!(list.len(), 2);
     
     // 세 번째 노드 추가
     let node3 = list.push_back(30);
-    assert_eq!(node3.borrow().value, 30);
+    assert_eq!(node3.lock().unwrap().value, 30);
     assert_eq!(list.len(), 3);
     
     // 링크 확인 (node1 -> node2 -> node3)
-    assert!(node1.borrow().prev.is_none());
-    assert!(node1.borrow().next.is_some());
+    assert!(node1.lock().unwrap().prev.is_none());
+    assert!(node1.lock().unwrap().next.is_some());
     
-    let next1 = node1.borrow().next.as_ref().unwrap().clone();
-    assert_eq!(next1.borrow().value, 20);
+    let next1 = node1.lock().unwrap().next.as_ref().unwrap().clone();
+    assert_eq!(next1.lock().unwrap().value, 20);
     
-    assert!(node2.borrow().prev.is_some());
-    assert!(node2.borrow().next.is_some());
+    assert!(node2.lock().unwrap().prev.is_some());
+    assert!(node2.lock().unwrap().next.is_some());
     
-    let next2 = node2.borrow().next.as_ref().unwrap().clone();
-    assert_eq!(next2.borrow().value, 30);
+    let next2 = node2.lock().unwrap().next.as_ref().unwrap().clone();
+    assert_eq!(next2.lock().unwrap().value, 30);
     
-    assert!(node3.borrow().prev.is_some());
-    assert!(node3.borrow().next.is_none());
+    assert!(node3.lock().unwrap().prev.is_some());
+    assert!(node3.lock().unwrap().next.is_none());
   }
   
   #[test]
@@ -178,16 +179,16 @@ mod tests {
     let front = list.peek_front().unwrap();
     
     // 값과 참조 비교
-    assert_eq!(front.borrow().value, 10);
-    assert!(Rc::ptr_eq(&front, &node1));
+    assert_eq!(front.lock().unwrap().value, 10);
+    assert!(Arc::ptr_eq(&front, &node1));
     
     // 추가 노드 삽입 후에도 첫 번째 노드 유지
     let node2 = list.push_back(20);
     let front = list.peek_front().unwrap();
     
-    assert_eq!(front.borrow().value, 10);
-    assert!(Rc::ptr_eq(&front, &node1));
-    assert!(!Rc::ptr_eq(&front, &node2));
+    assert_eq!(front.lock().unwrap().value, 10);
+    assert!(Arc::ptr_eq(&front, &node1));
+    assert!(!Arc::ptr_eq(&front, &node2));
   }
   
   #[test]
@@ -206,30 +207,30 @@ mod tests {
     
     // 첫 번째 노드 제거
     let popped1 = list.pop_front().unwrap();
-    assert_eq!(popped1.borrow().value, 10);
-    assert!(Rc::ptr_eq(&popped1, &node1));
+    assert_eq!(popped1.lock().unwrap().value, 10);
+    assert!(Arc::ptr_eq(&popped1, &node1));
     assert_eq!(list.len(), 2);
     
     // 두 번째 노드가 이제 첫 번째가 됨
     let front = list.peek_front().unwrap();
-    assert_eq!(front.borrow().value, 20);
-    assert!(Rc::ptr_eq(&front, &node2));
+    assert_eq!(front.lock().unwrap().value, 20);
+    assert!(Arc::ptr_eq(&front, &node2));
     
     // 두 번째 노드 제거
     let popped2 = list.pop_front().unwrap();
-    assert_eq!(popped2.borrow().value, 20);
-    assert!(Rc::ptr_eq(&popped2, &node2));
+    assert_eq!(popped2.lock().unwrap().value, 20);
+    assert!(Arc::ptr_eq(&popped2, &node2));
     assert_eq!(list.len(), 1);
     
     // 세 번째 노드가 이제 첫 번째가 됨
     let front = list.peek_front().unwrap();
-    assert_eq!(front.borrow().value, 30);
-    assert!(Rc::ptr_eq(&front, &node3));
+    assert_eq!(front.lock().unwrap().value, 30);
+    assert!(Arc::ptr_eq(&front, &node3));
     
     // 마지막 노드 제거
     let popped3 = list.pop_front().unwrap();
-    assert_eq!(popped3.borrow().value, 30);
-    assert!(Rc::ptr_eq(&popped3, &node3));
+    assert_eq!(popped3.lock().unwrap().value, 30);
+    assert!(Arc::ptr_eq(&popped3, &node3));
     assert_eq!(list.len(), 0);
     
     // 리스트가 비어있어야 함
@@ -255,13 +256,13 @@ mod tests {
     assert_eq!(list.len(), 4);
     
     // 링크 확인 (node2 -> node4)
-    let next2 = node2.borrow().next.as_ref().unwrap().clone();
-    assert_eq!(next2.borrow().value, 40);
-    assert!(Rc::ptr_eq(&next2, &node4));
+    let next2 = node2.lock().unwrap().next.as_ref().unwrap().clone();
+    assert_eq!(next2.lock().unwrap().value, 40);
+    assert!(Arc::ptr_eq(&next2, &node4));
     
-    let prev4 = node4.borrow().prev.as_ref().unwrap().upgrade().unwrap();
-    assert_eq!(prev4.borrow().value, 20);
-    assert!(Rc::ptr_eq(&prev4, &node2));
+    let prev4 = node4.lock().unwrap().prev.as_ref().unwrap().upgrade().unwrap();
+    assert_eq!(prev4.lock().unwrap().value, 20);
+    assert!(Arc::ptr_eq(&prev4, &node2));
     
     // 첫 번째 노드 제거 (node1)
     list.remove(node1);
@@ -269,16 +270,16 @@ mod tests {
     
     // 노드2가 이제 첫 번째가 됨
     let front = list.peek_front().unwrap();
-    assert_eq!(front.borrow().value, 20);
-    assert!(Rc::ptr_eq(&front, &node2));
-    assert!(node2.borrow().prev.is_none());
+    assert_eq!(front.lock().unwrap().value, 20);
+    assert!(Arc::ptr_eq(&front, &node2));
+    assert!(node2.lock().unwrap().prev.is_none());
     
     // 마지막 노드 제거 (node5)
     list.remove(node5);
     assert_eq!(list.len(), 2);
     
     // node4가 이제 마지막이 됨
-    assert!(node4.borrow().next.is_none());
+    assert!(node4.lock().unwrap().next.is_none());
     
     // 모든 노드 제거 후 비어있는지 확인
     list.remove(node2);
@@ -306,14 +307,14 @@ mod tests {
     
     // pop_front 실행
     let popped = list.pop_front().unwrap();
-    assert_eq!(popped.borrow().value, 20);
-    assert!(Rc::ptr_eq(&popped, &node2));
+    assert_eq!(popped.lock().unwrap().value, 20);
+    assert!(Arc::ptr_eq(&popped, &node2));
     assert_eq!(list.len(), 1);
     
     // 마지막 남은 노드 확인
     let front = list.peek_front().unwrap();
-    assert_eq!(front.borrow().value, 30);
-    assert!(Rc::ptr_eq(&front, &node3));
+    assert_eq!(front.lock().unwrap().value, 30);
+    assert!(Arc::ptr_eq(&front, &node3));
     
     // 마지막 노드 제거
     list.remove(node3);

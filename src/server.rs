@@ -6,6 +6,7 @@ use tokio::sync::broadcast;
 use axum::Router;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
+use sqlx::sqlite::SqlitePool;
 
 use crate::api::create_api_router;
 use crate::matching_engine::engine::MatchingEngine;
@@ -13,6 +14,7 @@ use crate::matching_engine::model::{Order, ExecutionReport};
 use crate::mdp::MarketDataPublisher;
 use crate::sequencer::OrderSequencer;
 use crate::api::models::WebSocketMessage;
+use crate::db::AsyncCommitManager;
 
 /// 사용자 잔고 정보
 #[derive(Debug, Clone)]
@@ -55,10 +57,11 @@ pub struct ServerState {
     pub execution_tx: broadcast::Sender<WebSocketMessage>,
     pub order_tx: mpsc::Sender<Order>,
     pub mdp: Arc<Mutex<MarketDataPublisher>>,
+    pub db_pool: SqlitePool,
 }
 
 /// 서버 시작
-pub async fn start_server(config: ServerConfig) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_server(config: ServerConfig, db_pool: SqlitePool) -> Result<(), Box<dyn std::error::Error>> {
     println!("xTrader 서버 시작 중...");
 
     // 채널 생성
@@ -78,6 +81,18 @@ pub async fn start_server(config: ServerConfig) -> Result<(), Box<dyn std::error
     mdp.set_broadcast_channel(broadcast_tx.clone());
     let mdp = Arc::new(Mutex::new(mdp));
 
+    // 🚀 초고성능: 비동기 커밋 매니저 생성
+    let async_commit_mgr = Arc::new(
+        AsyncCommitManager::new(db_pool.clone())
+            .with_config(100, 10) // 배치 크기: 100, 간격: 10ms
+    );
+
+    // 비동기 커밋 루프 시작 (백그라운드)
+    let commit_mgr_clone = async_commit_mgr.clone();
+    tokio::spawn(async move {
+        commit_mgr_clone.run_batch_commit_loop().await;
+    });
+
     // 시퀀서용 채널 생성
     let (sequencer_tx, sequencer_rx) = mpsc::channel::<Order>();
 
@@ -88,6 +103,7 @@ pub async fn start_server(config: ServerConfig) -> Result<(), Box<dyn std::error
         exec_rx,
         broadcast_tx.clone(),
         mdp.clone(),
+        async_commit_mgr.clone(),
     );
 
     // 시퀀서 실행 태스크
@@ -110,6 +126,7 @@ pub async fn start_server(config: ServerConfig) -> Result<(), Box<dyn std::error
         execution_tx: broadcast_tx,
         order_tx: order_tx,
         mdp: mdp.clone(),
+        db_pool: db_pool.clone(),
     };
 
     // REST API 라우터 생성

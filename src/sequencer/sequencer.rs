@@ -8,11 +8,15 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use log::{debug, info, warn, error};
 use uuid::Uuid;
+use sqlx::sqlite::SqlitePool;
 
 use crate::matching_engine::model::{Order, ExecutionReport, OrderBookSnapshot};
 use crate::api::models::WebSocketMessage;
 use crate::mdp::model::{MarketStatistics, CandlestickData};
 use crate::mdp::MarketDataPublisher;
+use crate::db::models::ExecutionRecord;
+use crate::db::repository::ExecutionRepository;
+use crate::db::AsyncCommitManager;
 
 /// 주문 시퀀서
 pub struct OrderSequencer {
@@ -26,6 +30,8 @@ pub struct OrderSequencer {
     broadcast_tx: tokio::sync::broadcast::Sender<WebSocketMessage>,
     /// 시장 데이터 발행자 참조
     mdp: Arc<Mutex<MarketDataPublisher>>,
+    /// 비동기 커밋 매니저 (초고성능 DB 저장)
+    async_commit_mgr: Arc<AsyncCommitManager>,
     /// 시퀀서 ID (로깅용)
     sequencer_id: String,
     /// 처리된 주문 수
@@ -40,6 +46,7 @@ impl OrderSequencer {
         exec_rx: Receiver<ExecutionReport>,
         broadcast_tx: tokio::sync::broadcast::Sender<WebSocketMessage>,
         mdp: Arc<Mutex<MarketDataPublisher>>,
+        async_commit_mgr: Arc<AsyncCommitManager>,
     ) -> Self {
         Self {
             order_rx,
@@ -47,6 +54,7 @@ impl OrderSequencer {
             exec_rx,
             broadcast_tx,
             mdp,
+            async_commit_mgr,
             sequencer_id: Uuid::new_v4().to_string(),
             processed_orders: Arc::new(Mutex::new(0)),
         }
@@ -90,30 +98,46 @@ impl OrderSequencer {
       let sequencer_id = self.sequencer_id.clone();
       let broadcast_tx = self.broadcast_tx.clone();
       let mdp = self.mdp.clone();
+      let async_commit_mgr = self.async_commit_mgr.clone();
       let mut exec_rx = std::mem::replace(&mut self.exec_rx, unsafe { std::mem::zeroed() });
 
       tokio::spawn(async move {
         while let Ok(report) = exec_rx.recv() {
           debug!("시퀀서 {}: 체결 보고서 수신 - {}", sequencer_id, report.execution_id);
-          
-          // 체결 보고서 순서 보장 (FIFO)
-          debug!("시퀀서 {}: 체결 보고서 순서 보장 처리 - {}", sequencer_id, report.execution_id);
-          
+
+          // 🚀 초고성능: 체결 내역을 비차단 큐에 추가 (즉시 반환)
+          let exec_record = ExecutionRecord {
+            exec_id: report.execution_id.clone(),
+            taker_order_id: report.order_id.clone(),
+            maker_order_id: "maker_placeholder".to_string(), // TODO: 실제 maker order id 추가 필요
+            symbol: report.symbol.clone(),
+            side: format!("{:?}", report.side),
+            price: report.price as i64,
+            quantity: report.quantity as i64,
+            taker_fee: 0, // TODO: 수수료 계산 로직 추가 필요
+            maker_fee: 0, // TODO: 수수료 계산 로직 추가 필요
+            transaction_time: report.timestamp as i64,
+          };
+
+          // 비동기 큐에 추가 (마이크로초 단위 지연)
+          async_commit_mgr.enqueue(exec_record).await;
+          debug!("시퀀서 {}: 체결 내역 비동기 큐 추가 - {}", sequencer_id, report.execution_id);
+
           // MDP로 체결 데이터 전달
           {
             let mut mdp_guard = mdp.lock().await;
             mdp_guard.process_execution(report.clone()).await;
           }
-          
+
           // WebSocket 메시지로 변환하여 브로드캐스트
           let message = WebSocketMessage::Execution(report.clone());
           match broadcast_tx.send(message) {
             Ok(receiver_count) => {
-              debug!("시퀀서 {}: 체결 보고서 브로드캐스트 완료 - {} (수신자: {})", 
+              debug!("시퀀서 {}: 체결 보고서 브로드캐스트 완료 - {} (수신자: {})",
                      sequencer_id, report.execution_id, receiver_count);
             }
             Err(e) => {
-              warn!("시퀀서 {}: 체결 보고서 브로드캐스트 실패 - {}: {}", 
+              warn!("시퀀서 {}: 체결 보고서 브로드캐스트 실패 - {}: {}",
                     sequencer_id, report.execution_id, e);
             }
           }

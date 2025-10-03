@@ -1,5 +1,6 @@
 mod api;
 mod data;
+mod db;
 mod matching_engine;
 mod mdp;
 mod sequencer;
@@ -16,9 +17,14 @@ use serde_json;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 로깅 초기화
     env_logger::init();
-    
+
     println!("xTrader 거래소 시스템 시작");
-    
+
+    // SQLite 데이터베이스 초기화 (메모리 모드)
+    println!("🗄️  SQLite 데이터베이스 초기화 중 (메모리 모드)...");
+    let db_pool = db::init_database("sqlite::memory:").await?;
+    println!("✅ 데이터베이스 연결 완료");
+
     // 실전적인 가짜 데이터셋 로드
     match DataLoader::load_dataset("data/fake_dataset.json") {
         Ok(dataset) => {
@@ -44,13 +50,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("⚠️ 데이터셋 로드 실패: {}, 기본값으로 진행", e);
         }
     }
-    
+
     // 서버 설정
     let config = ServerConfig::default();
-    
-    // 서버 시작
-    start_server(config).await?;
-    
+
+    // 서버 시작 (DB 풀 전달)
+    start_server(config, db_pool).await?;
+
     Ok(())
 }
 
