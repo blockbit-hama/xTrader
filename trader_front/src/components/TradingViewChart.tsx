@@ -97,8 +97,8 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
     chartRef.current = chart;
 
-    // 캔들스틱 시리즈 추가 (v4.x 방식)
-    const candlestickSeries = (chart as any).addCandlestickSeries({
+    // 캔들스틱 시리즈 추가
+    const candlestickSeries = chart.addCandlestickSeries({
       upColor: '#28a745',
       downColor: '#dc3545',
       borderDownColor: '#dc3545',
@@ -110,12 +110,12 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
     candlestickSeriesRef.current = candlestickSeries;
 
     // 볼륨 바 시리즈 추가
-    const volumeSeries = (chart as any).addHistogramSeries({
+    const volumeSeries = chart.addHistogramSeries({
       color: '#26a69a',
       priceFormat: {
         type: 'volume',
       },
-      priceScaleId: '',
+      priceScaleId: 'volume-scale',
       scaleMargins: {
         top: 0.8,
         bottom: 0,
@@ -123,6 +123,14 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
     });
 
     volumeSeriesRef.current = volumeSeries;
+
+    // 볼륨 스케일 설정
+    chart.priceScale('volume-scale').applyOptions({
+      scaleMargins: {
+        top: 0.8,
+        bottom: 0,
+      },
+    });
 
     return () => {
       chart.remove();
