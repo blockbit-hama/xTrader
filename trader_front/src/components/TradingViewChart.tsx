@@ -272,7 +272,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
             title: 'BB Upper',
             lineStyle: 2 // Dashed
           });
-          upperSeries.setData(bbData.upper);
+          upperSeries.setData(bbData.upper.map(d => ({ ...d, time: d.time as any })));
           seriesMap.set('bb_upper', upperSeries);
           
           // 하단 밴드
@@ -282,7 +282,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
             title: 'BB Lower',
             lineStyle: 2 // Dashed
           });
-          lowerSeries.setData(bbData.lower);
+          lowerSeries.setData(bbData.lower.map(d => ({ ...d, time: d.time as any })));
           seriesMap.set('bb_lower', lowerSeries);
           
           // 중간선 (MA20)
@@ -312,7 +312,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
             priceScaleId: 'macd-scale',
             lineStyle: 2 // Dashed
           });
-          signalSeries.setData(macdData.signal);
+          signalSeries.setData(macdData.signal.map(d => ({ ...d, time: d.time as any })));
           seriesMap.set('macd_signal', signalSeries);
           
           // 히스토그램
@@ -321,7 +321,11 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
             title: 'MACD Histogram',
             priceScaleId: 'macd-scale'
           });
-          histogramSeries.setData(macdData.histogram.map(d => ({ ...d, color: d.value >= 0 ? '#28a745' : '#dc3545' })));
+          histogramSeries.setData(macdData.histogram.map(d => ({ 
+            ...d, 
+            time: d.time as any, 
+            color: d.value >= 0 ? '#28a745' : '#dc3545' 
+          })));
           seriesMap.set('macd_histogram', histogramSeries);
           
           // MACD용 별도 스케일 설정
@@ -345,7 +349,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
       }
 
       if (series && indicatorData.length > 0) {
-        series.setData(indicatorData);
+        series.setData(indicatorData.map(d => ({ ...d, time: d.time as any })));
         seriesMap.set(indicatorKey, series);
       }
     });
