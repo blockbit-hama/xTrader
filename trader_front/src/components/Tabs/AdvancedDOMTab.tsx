@@ -49,6 +49,16 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
   const [orderQuantity, setOrderQuantity] = useState<string>('');
   const [orderType, setOrderType] = useState<'Market' | 'Limit'>('Limit');
   const [enabledIndicators, setEnabledIndicators] = useState<Set<string>>(new Set());
+  
+  // 주문 상태 관리
+  const [orderStatus, setOrderStatus] = useState<'idle' | 'submitting' | 'submitted' | 'executed' | 'failed'>('idle');
+  const [orderNotifications, setOrderNotifications] = useState<Array<{
+    id: string;
+    type: 'success' | 'error' | 'info';
+    message: string;
+    timestamp: number;
+  }>>([]);
+  const [userBalance, setUserBalance] = useState(balance);
   const [showVolumeProfile, setShowVolumeProfile] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(true);
   const [depthLevels, setDepthLevels] = useState(20);
@@ -253,28 +263,69 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
   const handleOrderSubmit = async () => {
     if (!selectedPrice || !orderQuantity || !selectedSide) return;
 
+    const quantity = parseFloat(orderQuantity);
+    const side = selectedSide === 'bid' ? 'buy' : 'sell';
+    
+    // 주문 제출 시작
+    setOrderStatus('submitting');
+    addNotification('info', '주문을 제출하는 중...');
+
     try {
       const orderData = {
         symbol: 'BTC-KRW',
         side: selectedSide === 'bid' ? 'Buy' : 'Sell',
         orderType: orderType,
         price: orderType === 'Limit' ? selectedPrice : undefined,
-        quantity: parseFloat(orderQuantity),
-        client_id: 'test_user_001', // 테스트 사용자 ID 추가
+        quantity: quantity,
+        client_id: 'test_user_001',
       };
 
       console.log('🚀 주문 제출:', orderData);
+      
+      // 실제 주문 제출
       const result = await onSubmitOrder(orderData);
       console.log('✅ 주문 성공:', result);
       
+      // 주문 접수 완료
+      setOrderStatus('submitted');
+      addNotification('success', `주문이 접수되었습니다!\n주문 ID: ${result.order_id || 'ORD-' + Date.now()}`);
+      
+      // 폼 리셋
       setOrderQuantity('');
       setSelectedPrice(null);
       setSelectedSide(null);
       
-      alert(`주문이 성공적으로 제출되었습니다!\n주문 ID: ${result.order_id}`);
+      // 체결 시뮬레이션 (2-5초 후)
+      const executionDelay = Math.random() * 3000 + 2000; // 2-5초
+      setTimeout(() => {
+        // 체결 완료
+        setOrderStatus('executed');
+        addNotification('success', `체결 완료!\n${side === 'buy' ? '매수' : '매도'} ${quantity} BTC @ ${selectedPrice?.toLocaleString()} KRW`);
+        
+        // 자산 업데이트
+        updateBalance(side, quantity, selectedPrice!);
+        
+        // 오더북 업데이트 시뮬레이션 (실제로는 웹소켓으로 받아야 함)
+        setTimeout(() => {
+          addNotification('info', '오더북이 업데이트되었습니다.');
+        }, 1000);
+        
+        // 상태 리셋
+        setTimeout(() => {
+          setOrderStatus('idle');
+        }, 2000);
+        
+      }, executionDelay);
+      
     } catch (error) {
       console.error('❌ 주문 실패:', error);
-      alert(`주문 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+      setOrderStatus('failed');
+      addNotification('error', `주문 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+      
+      // 상태 리셋
+      setTimeout(() => {
+        setOrderStatus('idle');
+      }, 3000);
     }
   };
 
@@ -286,6 +337,41 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
       newIndicators.delete(indicator);
     }
     setEnabledIndicators(newIndicators);
+  };
+
+  // 알림 관리 함수들
+  const addNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    const notification = {
+      id: Date.now().toString(),
+      type,
+      message,
+      timestamp: Date.now()
+    };
+    setOrderNotifications(prev => [...prev, notification]);
+    
+    // 3초 후 자동 제거
+    setTimeout(() => {
+      setOrderNotifications(prev => prev.filter(n => n.id !== notification.id));
+    }, 3000);
+  };
+
+  const removeNotification = (id: string) => {
+    setOrderNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  // 자산 업데이트 함수
+  const updateBalance = (side: 'buy' | 'sell', quantity: number, price: number) => {
+    setUserBalance(prev => {
+      const newBalance = { ...prev };
+      if (side === 'buy') {
+        newBalance.BTC += quantity;
+        newBalance.KRW -= quantity * price;
+      } else {
+        newBalance.BTC -= quantity;
+        newBalance.KRW += quantity * price;
+      }
+      return newBalance;
+    });
   };
 
   // Always show the component since we have mock data available
@@ -302,7 +388,32 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
   });
 
   return (
-    <Container>
+    <>
+      {/* 알림 박스들 */}
+      <NotificationContainer>
+        {orderNotifications.map((notification) => (
+          <NotificationBox key={notification.id} type={notification.type}>
+            <NotificationHeader type={notification.type}>
+              <NotificationIcon type={notification.type}>
+                {notification.type === 'success' ? '✅' : 
+                 notification.type === 'error' ? '❌' : 'ℹ️'}
+              </NotificationIcon>
+              <NotificationTitle type={notification.type}>
+                {notification.type === 'success' ? '성공' : 
+                 notification.type === 'error' ? '오류' : '정보'}
+              </NotificationTitle>
+              <CloseButton onClick={() => removeNotification(notification.id)}>
+                ×
+              </CloseButton>
+            </NotificationHeader>
+            <NotificationMessage type={notification.type}>
+              {notification.message}
+            </NotificationMessage>
+          </NotificationBox>
+        ))}
+      </NotificationContainer>
+
+      <Container>
       {/* Header with Controls */}
       <Header>
         <Title>🎯 고급 Depth of Market</Title>
@@ -515,6 +626,21 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
 
         {/* Right Panel - Quick Order & Executions */}
         <RightPanel>
+          {/* Balance Section */}
+          <OrderSection>
+            <SectionTitle>💰 내 자산</SectionTitle>
+            <OrderForm>
+              <OrderInfo>
+                <OrderLabel>BTC:</OrderLabel>
+                <OrderValue type="bid">{userBalance.BTC.toFixed(8)} BTC</OrderValue>
+              </OrderInfo>
+              <OrderInfo>
+                <OrderLabel>KRW:</OrderLabel>
+                <OrderValue type="ask">{formatPrice(userBalance.KRW)} KRW</OrderValue>
+              </OrderInfo>
+            </OrderForm>
+          </OrderSection>
+
           {/* Quick Order Section */}
           <OrderSection>
             <SectionTitle>⚡ 빠른 주문</SectionTitle>
@@ -1160,6 +1286,113 @@ const OrderButton = styled.button<{ type: 'bid' | 'ask' }>`
     background: ${props => (props.type === 'bid' ? '#1e7e34' : '#c82333')};
     transform: translateY(-1px);
   }
+`;
+
+// 알림 박스 스타일
+const NotificationContainer = styled.div`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const NotificationBox = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  background: ${props => {
+    switch (props.type) {
+      case 'success': return '#d4edda';
+      case 'error': return '#f8d7da';
+      case 'info': return '#d1ecf1';
+      default: return '#f8f9fa';
+    }
+  }};
+  border: 1px solid ${props => {
+    switch (props.type) {
+      case 'success': return '#c3e6cb';
+      case 'error': return '#f5c6cb';
+      case 'info': return '#bee5eb';
+      default: return '#dee2e6';
+    }
+  }};
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+`;
+
+const NotificationHeader = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+`;
+
+const NotificationIcon = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  font-size: 16px;
+  color: ${props => {
+    switch (props.type) {
+      case 'success': return '#155724';
+      case 'error': return '#721c24';
+      case 'info': return '#0c5460';
+      default: return '#495057';
+    }
+  }};
+`;
+
+const NotificationTitle = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  font-weight: 600;
+  font-size: 14px;
+  color: ${props => {
+    switch (props.type) {
+      case 'success': return '#155724';
+      case 'error': return '#721c24';
+      case 'info': return '#0c5460';
+      default: return '#495057';
+    }
+  }};
+`;
+
+const NotificationMessage = styled.div<{ type: 'success' | 'error' | 'info' }>`
+  font-size: 13px;
+  color: ${props => {
+    switch (props.type) {
+      case 'success': return '#155724';
+      case 'error': return '#721c24';
+      case 'info': return '#0c5460';
+      default: return '#495057';
+    }
+  }};
+  white-space: pre-line;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  color: #6c757d;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  
+  &:hover {
+    color: #495057;
+  }
+`;
 
   &:disabled {
     background: #e9ecef;
