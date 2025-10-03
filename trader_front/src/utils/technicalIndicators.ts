@@ -29,7 +29,7 @@ export function calculateMA(candles: CandleData[], period: number): IndicatorDat
     
     result.push({
       time: Math.floor(candles[i].open_time / 1000),
-      value: average / 1000000 // 백만원 단위로 변환
+      value: average // 원래 가격 그대로 사용
     });
   }
   
@@ -45,14 +45,14 @@ export function calculateEMA(candles: CandleData[], period: number): IndicatorDa
   let ema = candles[0].close;
   result.push({
     time: Math.floor(candles[0].open_time / 1000),
-    value: ema / 1000000
+    value: ema
   });
   
   for (let i = 1; i < candles.length; i++) {
     ema = (candles[i].close * multiplier) + (ema * (1 - multiplier));
     result.push({
       time: Math.floor(candles[i].open_time / 1000),
-      value: ema / 1000000
+      value: ema
     });
   }
   
@@ -175,24 +175,24 @@ export function calculateBollingerBands(candles: CandleData[], period: number = 
     // 표준편차 계산
     let sum = 0;
     for (let j = 0; j < period; j++) {
-      const deviation = candles[i - j].close - (middle[i - period + 1]?.value * 1000000 || 0);
+      const deviation = candles[i - j].close - (middle[i - period + 1]?.value || 0);
       sum += deviation * deviation;
     }
     const variance = sum / period;
     const standardDeviation = Math.sqrt(variance);
     
-    const middleValue = middle[i - period + 1]?.value * 1000000 || 0;
+    const middleValue = middle[i - period + 1]?.value || 0;
     const upperValue = middleValue + (standardDeviation * stdDev);
     const lowerValue = middleValue - (standardDeviation * stdDev);
     
     upper.push({
       time: Math.floor(candles[i].open_time / 1000),
-      value: upperValue / 1000000
+      value: upperValue
     });
     
     lower.push({
       time: Math.floor(candles[i].open_time / 1000),
-      value: lowerValue / 1000000
+      value: lowerValue
     });
   }
   

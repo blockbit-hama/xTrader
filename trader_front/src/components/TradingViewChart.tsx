@@ -136,10 +136,10 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
     const formattedData = data
       .map((candle) => ({
         time: Math.floor(candle.open_time / 1000) as any, // Unix timestamp in seconds
-        open: candle.open / 1000000, // 백만원 단위로 변환 (55백만 -> 55)
-        high: candle.high / 1000000,
-        low: candle.low / 1000000,
-        close: candle.close / 1000000,
+        open: candle.open, // 원래 가격 그대로 사용
+        high: candle.high,
+        low: candle.low,
+        close: candle.close,
       }))
       // 시간순으로 정렬
       .sort((a, b) => a.time - b.time)
