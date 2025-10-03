@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import TradingViewChart from '../TradingViewChart';
 import TechnicalIndicatorControls from '../TechnicalIndicatorControls';
+import { OrderBook, MarketStatistics, Execution, Candle } from '../../types/trading';
 
 // Types
 interface OrderLevel {
@@ -10,23 +11,9 @@ interface OrderLevel {
   percentage: number;
 }
 
-interface OrderBook {
+interface ProcessedOrderBook {
   bids: OrderLevel[];
   asks: OrderLevel[];
-}
-
-interface Execution {
-  side: 'Buy' | 'Sell';
-  price: number;
-  quantity: number;
-  timestamp: number;
-}
-
-interface Statistics {
-  volume24h: number;
-  priceChange24h: number;
-  high24h: number;
-  low24h: number;
 }
 
 interface CandleData {
@@ -55,19 +42,19 @@ interface UserBalance {
 
 interface AdvancedDOMTabProps {
   orderBook?: OrderBook | null;
-  statistics?: Statistics | null;
+  statistics?: MarketStatistics | null;
   executions: Execution[];
   loading: boolean;
   balance: UserBalance;
   onSubmitOrder: (orderData: any) => Promise<void>;
   onPriceClick: (price: number, side: 'bid' | 'ask') => void;
-  candles: CandleData[];
+  candles: Candle[];
   showMockData: boolean;
-  mockCandles: CandleData[];
+  mockCandles: Candle[];
 }
 
 // Mock data generators
-const generateMockOrderBook = (): OrderBook => {
+const generateMockOrderBook = (): ProcessedOrderBook => {
   const basePrice = 95000000;
   const bids: OrderLevel[] = [];
   const asks: OrderLevel[] = [];
@@ -127,15 +114,39 @@ const formatQuantity = (quantity: number): string => {
   return quantity.toFixed(6);
 };
 
+// Convert OrderBook to ProcessedOrderBook format
+const convertOrderBook = (orderBook: OrderBook | null): ProcessedOrderBook => {
+  if (!orderBook) {
+    return generateMockOrderBook();
+  }
+  
+  const bids: OrderLevel[] = orderBook.bids.map(bid => ({
+    price: bid.price,
+    quantity: bid.volume,
+    percentage: Math.random() * 100 // Calculate based on volume if needed
+  }));
+  
+  const asks: OrderLevel[] = orderBook.asks.map(ask => ({
+    price: ask.price,
+    quantity: ask.volume,
+    percentage: Math.random() * 100 // Calculate based on volume if needed
+  }));
+  
+  return { bids, asks };
+};
+
 // Convert candle data to TradingViewChart format
-const convertCandleData = (candles: CandleData[]) => {
+const convertCandleData = (candles: Candle[]) => {
   return candles.map(candle => ({
-    time: candle.time || candle.open_time || Date.now(),
+    time: candle.open_time,
     open: candle.open,
     high: candle.high,
     low: candle.low,
     close: candle.close,
-    volume: candle.volume
+    volume: candle.volume,
+    open_time: candle.open_time,
+    close_time: candle.close_time,
+    trade_count: candle.trade_count
   }));
 };
 
@@ -169,6 +180,10 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
   // Mock data
   const mockOrderBook = generateMockOrderBook();
   const mockExecutions = generateMockExecutions();
+  
+  // Convert data
+  const processedOrderBook = convertOrderBook(orderBook);
+  const convertedCandles = convertCandleData(candles.length > 0 ? candles : mockCandles);
 
   // Notification management
   const addNotification = (type: 'success' | 'error' | 'info', message: string) => {
@@ -284,7 +299,7 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
 
   // Process order book data for display
   const processedData = React.useMemo(() => {
-    const data = orderBook || mockOrderBook;
+    const data = processedOrderBook;
     
     // Calculate cumulative percentages
     const processedBids = data.bids.map((bid, index) => ({
@@ -298,7 +313,7 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
     }));
     
     return { processedBids, processedAsks };
-  }, [orderBook]);
+  }, [processedOrderBook]);
 
   return (
     <>
@@ -394,9 +409,9 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
               />
               
               <ChartContainer>
-                {candles.length > 0 || mockCandles.length > 0 ? (
+                {convertedCandles.length > 0 ? (
                   <TradingViewChart
-                    data={convertCandleData(candles.length > 0 ? candles : mockCandles)}
+                    data={convertedCandles}
                     width={750}
                     height={600}
                     enabledIndicators={enabledIndicators}
@@ -418,16 +433,16 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
                 <MarketInfo>
                   <InfoItem>
                     <InfoLabel>최고 매수가:</InfoLabel>
-                    <InfoValue type="bid">{formatPrice(mockOrderBook.bids[0]?.price || 0)}</InfoValue>
+                    <InfoValue type="bid">{formatPrice(processedOrderBook.bids[0]?.price || 0)}</InfoValue>
                   </InfoItem>
                   <InfoItem>
                     <InfoLabel>최저 매도가:</InfoLabel>
-                    <InfoValue type="ask">{formatPrice(mockOrderBook.asks[0]?.price || 0)}</InfoValue>
+                    <InfoValue type="ask">{formatPrice(processedOrderBook.asks[0]?.price || 0)}</InfoValue>
                   </InfoItem>
                   <InfoItem>
                     <InfoLabel>스프레드:</InfoLabel>
                     <InfoValue type="spread">
-                      {formatPrice((mockOrderBook.asks[0]?.price || 0) - (mockOrderBook.bids[0]?.price || 0))}
+                      {formatPrice((processedOrderBook.asks[0]?.price || 0) - (processedOrderBook.bids[0]?.price || 0))}
                     </InfoValue>
                   </InfoItem>
                 </MarketInfo>
