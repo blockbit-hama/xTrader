@@ -22,7 +22,7 @@ const PortfolioTab: React.FC<PortfolioTabProps> = ({ balance, currentPrice, stat
   const [totalChange, setTotalChange] = useState<number>(0);
   const [totalChangePercent, setTotalChangePercent] = useState<number>(0);
 
-  // Mock portfolio data
+  // Mock portfolio data with test balances
   const assets: Asset[] = [
     {
       symbol: 'BTC',
@@ -43,6 +43,14 @@ const PortfolioTab: React.FC<PortfolioTabProps> = ({ balance, currentPrice, stat
       changePercent24h: 0
     }
   ];
+
+  // Test user info
+  const testUserInfo = {
+    userId: 'test_user_001',
+    name: '테스트 트레이더',
+    accountType: 'VIP',
+    tradingLevel: 'Professional'
+  };
 
   // Calculate portfolio metrics
   useEffect(() => {
@@ -71,39 +79,51 @@ const PortfolioTab: React.FC<PortfolioTabProps> = ({ balance, currentPrice, stat
   };
 
   const containerStyle: React.CSSProperties = {
-    backgroundColor: '#161a20',
-    border: '1px solid #2b3139',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e9ecef',
     borderRadius: '8px',
     padding: '16px',
     height: '100%',
-    overflow: 'auto'
+    overflow: 'auto',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
   };
 
   const headerStyle: React.CSSProperties = {
     marginBottom: '20px',
     paddingBottom: '16px',
-    borderBottom: '1px solid #2b3139'
+    borderBottom: '1px solid #e9ecef'
   };
 
   const titleStyle: React.CSSProperties = {
     margin: 0,
-    color: '#ffffff',
+    color: '#1a1a1a',
     fontSize: '18px',
     fontWeight: '600',
     marginBottom: '8px'
   };
 
+  const testAccountStyle: React.CSSProperties = {
+    backgroundColor: '#e3f2fd',
+    border: '1px solid #2196f3',
+    borderRadius: '8px',
+    padding: '12px',
+    marginBottom: '16px',
+    fontSize: '14px',
+    color: '#1976d2'
+  };
+
   const portfolioSummaryStyle: React.CSSProperties = {
-    backgroundColor: '#1e2329',
+    backgroundColor: '#f8f9fa',
     borderRadius: '8px',
     padding: '16px',
-    marginBottom: '20px'
+    marginBottom: '20px',
+    border: '1px solid #e9ecef'
   };
 
   const totalValueStyle: React.CSSProperties = {
     fontSize: '24px',
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#1a1a1a',
     marginBottom: '8px'
   };
 
@@ -215,6 +235,18 @@ const PortfolioTab: React.FC<PortfolioTabProps> = ({ balance, currentPrice, stat
     <div style={containerStyle}>
       <div style={headerStyle}>
         <h3 style={titleStyle}>💼 포트폴리오</h3>
+        
+        {/* Test Account Info */}
+        <div style={testAccountStyle}>
+          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+            🧪 테스트 계정 (실제 거래 가능)
+          </div>
+          <div>사용자: {testUserInfo.name} ({testUserInfo.userId})</div>
+          <div>계정 유형: {testUserInfo.accountType} | 거래 레벨: {testUserInfo.tradingLevel}</div>
+          <div style={{ marginTop: '4px', fontSize: '12px', opacity: 0.8 }}>
+            💡 이 계정으로 실제 매수/매도 주문이 가능합니다
+          </div>
+        </div>
         
         {/* Timeframe Selector */}
         <div style={timeframeSelectorStyle}>

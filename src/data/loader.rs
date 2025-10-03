@@ -175,14 +175,21 @@ impl DataLoader {
                 name: "김투자".to_string(),
                 user_type: "retail".to_string(),
                 trading_style: "scalping".to_string(),
-                balance: 50000000,
+                balance: 10_000_000_000, // 100억원 (테스트용)
             },
             FakeUser {
                 id: "user_002".to_string(),
                 name: "박트레이더".to_string(),
                 user_type: "retail".to_string(),
                 trading_style: "swing".to_string(),
-                balance: 100000000,
+                balance: 20_000_000_000, // 200억원 (테스트용)
+            },
+            FakeUser {
+                id: "test_user_001".to_string(),
+                name: "테스트사용자".to_string(),
+                user_type: "retail".to_string(),
+                trading_style: "day_trading".to_string(),
+                balance: 50_000_000_000, // 500억원 (테스트용)
             }
         ]
     }

@@ -100,6 +100,7 @@ export const useTradingAPI = (symbol: string) => {
     orderType: 'Market' | 'Limit';
     price?: number;
     quantity: number;
+    client_id?: string;
   }) => {
     try {
       setLoading(true);
@@ -114,6 +115,7 @@ export const useTradingAPI = (symbol: string) => {
           order_type: orderData.orderType,
           price: orderData.price,
           quantity: orderData.quantity,
+          client_id: orderData.client_id || 'test_user_001', // 기본값 설정
         }),
       });
 

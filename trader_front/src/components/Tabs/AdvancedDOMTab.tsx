@@ -258,14 +258,21 @@ const AdvancedDOMTab: React.FC<AdvancedDOMTabProps> = ({
         orderType: orderType,
         price: orderType === 'Limit' ? selectedPrice : undefined,
         quantity: parseFloat(orderQuantity),
+        client_id: 'test_user_001', // 테스트 사용자 ID 추가
       };
 
-      await onSubmitOrder(orderData);
+      console.log('🚀 주문 제출:', orderData);
+      const result = await onSubmitOrder(orderData);
+      console.log('✅ 주문 성공:', result);
+      
       setOrderQuantity('');
       setSelectedPrice(null);
       setSelectedSide(null);
+      
+      alert(`주문이 성공적으로 제출되었습니다!\n주문 ID: ${result.order_id}`);
     } catch (error) {
-      console.error('Order submission failed:', error);
+      console.error('❌ 주문 실패:', error);
+      alert(`주문 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   };
 

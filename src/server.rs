@@ -1,5 +1,6 @@
 use std::sync::Arc;
 use std::sync::mpsc;
+use std::collections::HashMap;
 use tokio::sync::Mutex;
 use tokio::sync::broadcast;
 use axum::Router;
@@ -12,6 +13,22 @@ use crate::matching_engine::model::{Order, ExecutionReport};
 use crate::mdp::MarketDataPublisher;
 use crate::sequencer::OrderSequencer;
 use crate::api::models::WebSocketMessage;
+
+/// 사용자 잔고 정보
+#[derive(Debug, Clone)]
+pub struct UserBalance {
+    pub krw: u64,
+    pub btc: u64,
+}
+
+impl Default for UserBalance {
+    fn default() -> Self {
+        Self {
+            krw: 50_000_000_000, // 500억원 (테스트용)
+            btc: 100_000_000,    // 100 BTC (테스트용)
+        }
+    }
+}
 
 /// 서버 설정
 #[derive(Clone)]

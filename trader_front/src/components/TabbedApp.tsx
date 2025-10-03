@@ -10,7 +10,7 @@ type TabType = 'order' | 'orderbook' | 'advanced-dom' | 'chart' | 'portfolio';
 
 const TabbedApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('chart');
-  const [balance] = useState({ BTC: 1.5, KRW: 50000000 });
+  const [balance] = useState({ BTC: 100.0, KRW: 50000000000 }); // 테스트용 대용량 잔고
   const { statistics, candles, orderBook, executions, loading, error, submitOrder } = useTradingAPI('BTC-KRW');
   const currentPrice = statistics?.last_price || 50000000;
 
