@@ -34,6 +34,16 @@ dotenv = "0.15"  # 환경 변수 로드
 # 데이터베이스 (SQLite)
 sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "sqlite", "uuid", "chrono"] }
 
+# Redis Streams
+redis = { version = "0.24", features = ["tokio-comp", "streams"] }
+
+# Apache Kafka (간단한 구현용)
+# kafka = "0.9"  # OpenSSL 의존성 문제로 임시 비활성화
+
+# RabbitMQ (간단한 구현용)
+# lapin = { version = "2.3", features = ["tokio"] }
+# tokio-amqp = "2.0"
+
 # 테스트 및 벤치마킹
 criterion = { version = "0.4", optional = true }
 

@@ -18,4 +18,7 @@ pub fn create_api_router() -> Router<ServerState> {
         .route("/api/v1/executions/:symbol", get(get_executions))
         .route("/api/v1/statistics/:symbol", get(get_statistics))
         .route("/api/v1/klines/:symbol/:interval", get(get_candles))
+        
+        // 하이브리드 호가창 동기화 API
+        .route("/api/v1/sync/:symbol", get(sync_orderbook))
 }

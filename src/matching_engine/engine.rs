@@ -3,12 +3,14 @@ use uuid::Uuid;
 use std::time::{SystemTime, UNIX_EPOCH};
 use log::{debug, error, info, warn, trace};
 use std::cmp::Reverse;
-use std::sync::mpsc::{Receiver, Sender};
+use std::sync::{Arc, mpsc::{Receiver, Sender}};
 use crate::matching_engine::model::{
   Order, OrderType, Side, ExecutionReport, OrderBookSnapshot
 };
 use crate::matching_engine::order_book::OrderBook;
-use crate::api::models::WebSocketMessage;
+use crate::matching_engine::orderbook_tracker::OrderBookTracker;
+use crate::api::models::{WebSocketMessage, OrderBookDelta, OrderBookSnapshot as ApiOrderBookSnapshot};
+use crate::mq::RabbitMQProducer;
 
 /// 매칭 엔진 구현
 pub struct MatchingEngine {
@@ -20,11 +22,15 @@ pub struct MatchingEngine {
   exec_tx: Sender<ExecutionReport>,
   /// WebSocket 브로드캐스트 채널
   broadcast_tx: Option<tokio::sync::broadcast::Sender<WebSocketMessage>>,
+  /// 호가창 변경 추적기
+  orderbook_tracker: OrderBookTracker,
+  /// RabbitMQ Producer (WebSocket 알림 발행)
+  rabbitmq_producer: Option<Arc<RabbitMQProducer>>,
 }
 
 impl MatchingEngine {
   /// 새 매칭 엔진 생성
-  pub fn new(symbols: Vec<String>, exec_tx: Sender<ExecutionReport>) -> Self {
+  pub fn new(symbols: Vec<String>, exec_tx: Sender<ExecutionReport>, rabbitmq_producer: Option<Arc<RabbitMQProducer>>) -> Self {
     let mut order_books = HashMap::new();
     
     // 지원하는 모든 심볼에 대해 주문장 생성
@@ -32,17 +38,36 @@ impl MatchingEngine {
       order_books.insert(symbol.clone(), OrderBook::new(symbol));
     }
     
+    // 호가창 변경 추적기 생성 (Delta 임계값: 1, Snapshot 간격: 30초)
+    let orderbook_tracker = OrderBookTracker::new(1, 30000);
+    
     MatchingEngine {
       order_books,
       order_store: HashMap::new(),
       exec_tx,
       broadcast_tx: None,
+      orderbook_tracker,
+      rabbitmq_producer,
     }
   }
 
   /// WebSocket 브로드캐스트 채널 설정
   pub fn set_broadcast_channel(&mut self, broadcast_tx: tokio::sync::broadcast::Sender<WebSocketMessage>) {
     self.broadcast_tx = Some(broadcast_tx);
+  }
+
+  /// 클라이언트 동기화 요청 처리
+  pub fn handle_sync_request(&mut self, symbol: &str) -> Option<ApiOrderBookSnapshot> {
+    if let Some(snapshot) = self.get_order_book_snapshot(symbol, 10) {
+      Some(self.orderbook_tracker.create_snapshot(symbol, &snapshot))
+    } else {
+      None
+    }
+  }
+
+  /// 특정 심볼의 현재 시퀀스 번호 조회
+  pub fn get_sequence_number(&self, symbol: &str) -> u64 {
+    self.orderbook_tracker.get_sequence(symbol)
   }
   
   /// 매칭 엔진 실행 (주문 처리 루프)
@@ -479,10 +504,52 @@ impl MatchingEngine {
     }
   }
 
-  /// 호가창 업데이트 브로드캐스트
-  fn broadcast_orderbook_update(&self, symbol: &str) {
+  /// 호가창 업데이트 브로드캐스트 (하이브리드 방식)
+  fn broadcast_orderbook_update(&mut self, symbol: &str) {
     if let Some(ref broadcast_tx) = self.broadcast_tx {
       if let Some(snapshot) = self.get_order_book_snapshot(symbol, 10) {
+        // Delta 업데이트 시도
+        if let Some(delta) = self.orderbook_tracker.analyze_changes(symbol, &snapshot) {
+          let message = WebSocketMessage::OrderBookDelta(delta);
+          if let Err(e) = broadcast_tx.send(message.clone()) {
+            warn!("호가창 Delta 업데이트 브로드캐스트 실패: {}", e);
+          }
+          
+          // 🚀 RabbitMQ에 WebSocket 메시지 발행
+          if let Some(ref rabbitmq_prod) = self.rabbitmq_producer {
+            let rabbitmq_prod_clone = rabbitmq_prod.clone();
+            tokio::spawn(async move {
+              if let Err(e) = rabbitmq_prod_clone.publish_websocket_message(&message).await {
+                error!("RabbitMQ WebSocket 메시지 발행 실패: {}", e);
+              }
+            });
+          }
+          
+          return;
+        }
+        
+        // Snapshot 전송이 필요한지 확인
+        if self.orderbook_tracker.should_send_snapshot(symbol) {
+          let api_snapshot = self.orderbook_tracker.create_snapshot(symbol, &snapshot);
+          let message = WebSocketMessage::OrderBookSnapshot(api_snapshot);
+          if let Err(e) = broadcast_tx.send(message.clone()) {
+            warn!("호가창 Snapshot 업데이트 브로드캐스트 실패: {}", e);
+          }
+          
+          // 🚀 RabbitMQ에 WebSocket 메시지 발행
+          if let Some(ref rabbitmq_prod) = self.rabbitmq_producer {
+            let rabbitmq_prod_clone = rabbitmq_prod.clone();
+            tokio::spawn(async move {
+              if let Err(e) = rabbitmq_prod_clone.publish_websocket_message(&message).await {
+                error!("RabbitMQ WebSocket 메시지 발행 실패: {}", e);
+              }
+            });
+          }
+          
+          return;
+        }
+        
+        // 기존 방식으로 폴백 (호환성 유지)
         let message = WebSocketMessage::OrderBookUpdate {
           symbol: symbol.to_string(),
           bids: snapshot.bids,
@@ -493,8 +560,18 @@ impl MatchingEngine {
             .as_millis() as u64,
         };
         
-        if let Err(e) = broadcast_tx.send(message) {
+        if let Err(e) = broadcast_tx.send(message.clone()) {
           warn!("호가창 업데이트 브로드캐스트 실패: {}", e);
+        }
+        
+        // 🚀 RabbitMQ에 WebSocket 메시지 발행
+        if let Some(ref rabbitmq_prod) = self.rabbitmq_producer {
+          let rabbitmq_prod_clone = rabbitmq_prod.clone();
+          tokio::spawn(async move {
+            if let Err(e) = rabbitmq_prod_clone.publish_websocket_message(&message).await {
+              error!("RabbitMQ WebSocket 메시지 발행 실패: {}", e);
+            }
+          });
         }
       }
     }

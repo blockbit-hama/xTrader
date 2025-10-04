@@ -7,6 +7,12 @@
 
 pub mod model;
 pub mod publisher;
+pub mod consumer;
+pub mod api;
+pub mod cache;
 
 pub use model::*;
 pub use publisher::MarketDataPublisher;
+pub use consumer::*;
+pub use api::*;
+pub use cache::*;

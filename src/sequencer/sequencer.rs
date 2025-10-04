@@ -17,6 +17,7 @@ use crate::mdp::MarketDataPublisher;
 use crate::db::models::ExecutionRecord;
 use crate::db::repository::ExecutionRepository;
 use crate::db::AsyncCommitManager;
+use crate::mq::{RedisStreamsProducer, KafkaProducer};
 
 /// 주문 시퀀서
 pub struct OrderSequencer {
@@ -32,6 +33,10 @@ pub struct OrderSequencer {
     mdp: Arc<Mutex<MarketDataPublisher>>,
     /// 비동기 커밋 매니저 (초고성능 DB 저장)
     async_commit_mgr: Arc<AsyncCommitManager>,
+    /// Redis Streams Producer (체결 내역 발행)
+    redis_producer: Option<Arc<RedisStreamsProducer>>,
+    /// Kafka Producer (시장 데이터 발행)
+    kafka_producer: Option<Arc<KafkaProducer>>,
     /// 시퀀서 ID (로깅용)
     sequencer_id: String,
     /// 처리된 주문 수
@@ -47,6 +52,8 @@ impl OrderSequencer {
         broadcast_tx: tokio::sync::broadcast::Sender<WebSocketMessage>,
         mdp: Arc<Mutex<MarketDataPublisher>>,
         async_commit_mgr: Arc<AsyncCommitManager>,
+        redis_producer: Option<Arc<RedisStreamsProducer>>,
+        kafka_producer: Option<Arc<KafkaProducer>>,
     ) -> Self {
         Self {
             order_rx,
@@ -55,6 +62,8 @@ impl OrderSequencer {
             broadcast_tx,
             mdp,
             async_commit_mgr,
+            redis_producer,
+            kafka_producer,
             sequencer_id: Uuid::new_v4().to_string(),
             processed_orders: Arc::new(Mutex::new(0)),
         }
@@ -99,6 +108,8 @@ impl OrderSequencer {
       let broadcast_tx = self.broadcast_tx.clone();
       let mdp = self.mdp.clone();
       let async_commit_mgr = self.async_commit_mgr.clone();
+      let redis_producer = self.redis_producer.clone();
+      let kafka_producer = self.kafka_producer.clone();
       let mut exec_rx = std::mem::replace(&mut self.exec_rx, unsafe { std::mem::zeroed() });
 
       tokio::spawn(async move {
@@ -122,6 +133,34 @@ impl OrderSequencer {
           // 비동기 큐에 추가 (마이크로초 단위 지연)
           async_commit_mgr.enqueue(exec_record).await;
           debug!("시퀀서 {}: 체결 내역 비동기 큐 추가 - {}", sequencer_id, report.execution_id);
+
+          // 🚀 Redis Streams에 체결 내역 발행 (영속화)
+          if let Some(redis_prod) = &redis_producer {
+            match redis_prod.publish_execution(&report).await {
+              Ok(message_id) => {
+                debug!("시퀀서 {}: Redis Streams 발행 완료 - {} -> {}", 
+                       sequencer_id, report.execution_id, message_id);
+              }
+              Err(e) => {
+                error!("시퀀서 {}: Redis Streams 발행 실패 - {}: {}", 
+                       sequencer_id, report.execution_id, e);
+              }
+            }
+          }
+
+          // 🚀 Kafka에 시장 데이터 발행 (외부 시스템 연동)
+          if let Some(kafka_prod) = &kafka_producer {
+            match kafka_prod.publish_execution(&report).await {
+              Ok(_) => {
+                debug!("시퀀서 {}: Kafka 발행 완료 - {} -> {}", 
+                       sequencer_id, report.execution_id, report.symbol);
+              }
+              Err(e) => {
+                error!("시퀀서 {}: Kafka 발행 실패 - {}: {}", 
+                       sequencer_id, report.execution_id, e);
+              }
+            }
+          }
 
           // MDP로 체결 데이터 전달
           {

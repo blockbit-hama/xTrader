@@ -9,8 +9,9 @@ use futures::{sink::SinkExt, stream::StreamExt};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::sync::broadcast;
+use serde_json::Value;
 
-use crate::api::models::WebSocketMessage;
+use crate::api::models::{WebSocketMessage, OrderBookSnapshot};
 use crate::matching_engine::model::ExecutionReport;
 use crate::server::ServerState;
 
@@ -37,7 +38,24 @@ async fn websocket_connection(
                 match msg {
                     Message::Text(text) => {
                         // 클라이언트로부터 받은 텍스트 메시지 처리
-                        println!("Received message: {}", text);
+                        if let Ok(json) = serde_json::from_str::<Value>(&text) {
+                            if let Some(msg_type) = json.get("type").and_then(|v| v.as_str()) {
+                                match msg_type {
+                                    "sync_request" => {
+                                        // 동기화 요청 처리
+                                        if let Some(symbol) = json.get("symbol").and_then(|v| v.as_str()) {
+                                            println!("Sync request for symbol: {}", symbol);
+                                            // TODO: 매칭 엔진에서 동기화 응답 생성
+                                        }
+                                    }
+                                    _ => {
+                                        println!("Unknown message type: {}", msg_type);
+                                    }
+                                }
+                            }
+                        } else {
+                            println!("Received message: {}", text);
+                        }
                     }
                     Message::Close(_) => {
                         println!("WebSocket connection closed");

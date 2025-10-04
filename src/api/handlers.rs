@@ -220,3 +220,23 @@ pub async fn get_candles(
         candles,
     }))
 }
+
+/// 호가창 동기화 핸들러 (하이브리드 방식)
+pub async fn sync_orderbook(
+    State(state): State<ServerState>,
+    Path(symbol): Path<String>,
+) -> Result<Json<OrderBookSnapshot>, (StatusCode, Json<ErrorResponse>)> {
+    let mut engine_guard = state.engine.lock().await;
+    
+    if let Some(snapshot) = engine_guard.handle_sync_request(&symbol) {
+        Ok(Json(snapshot))
+    } else {
+        Err((
+            StatusCode::NOT_FOUND,
+            Json(ErrorResponse {
+                error: "SYMBOL_NOT_FOUND".to_string(),
+                message: format!("심볼 '{}'을 찾을 수 없습니다", symbol),
+            }),
+        ))
+    }
+}
