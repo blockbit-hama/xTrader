@@ -34,6 +34,21 @@ pub struct CancelOrderResponse {
     pub message: String,
 }
 
+/// 주문 상태 조회 응답 (하이브리드 방식)
+#[derive(Debug, Serialize)]
+pub struct OrderStatusResponse {
+    pub order_id: String,
+    pub symbol: String,
+    pub side: String,
+    pub order_type: String,
+    pub price: u64,
+    pub quantity: u64,
+    pub remaining_quantity: u64,
+    pub status: String, // "Filled", "PartiallyFilled", "Pending"
+    pub created_at: u64,
+    pub updated_at: u64,
+}
+
 /// 체결 내역 조회 응답
 #[derive(Debug, Serialize)]
 pub struct ExecutionResponse {
@@ -138,8 +153,11 @@ pub struct OrderBookSnapshot {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "type")]
 pub enum WebSocketMessage {
-    /// 체결 결과
-    Execution(ExecutionReport),
+    /// 체결 결과 (하이브리드 방식 - 상태 정보 포함)
+    Execution {
+        execution_report: ExecutionReport,
+        order_status: String, // "Filled", "PartiallyFilled", "Pending"
+    },
     /// 호가창 Delta 업데이트 (변경된 부분만)
     OrderBookDelta(OrderBookDelta),
     /// 호가창 Snapshot 업데이트 (전체 호가창)

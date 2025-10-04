@@ -17,7 +17,7 @@ use crate::mdp::MarketDataPublisher;
 use crate::db::models::ExecutionRecord;
 use crate::db::repository::ExecutionRepository;
 use crate::db::AsyncCommitManager;
-use crate::mq::{RedisStreamsProducer, KafkaProducer};
+use crate::mq::{RedisStreamsProducer, KafkaProducer, RabbitMQProducer};
 
 /// 주문 시퀀서
 pub struct OrderSequencer {
@@ -37,6 +37,8 @@ pub struct OrderSequencer {
     redis_producer: Option<Arc<RedisStreamsProducer>>,
     /// Kafka Producer (시장 데이터 발행)
     kafka_producer: Option<Arc<KafkaProducer>>,
+    /// RabbitMQ Producer (WebSocket 알림 발행)
+    rabbitmq_producer: Option<Arc<RabbitMQProducer>>,
     /// 시퀀서 ID (로깅용)
     sequencer_id: String,
     /// 처리된 주문 수
@@ -54,6 +56,7 @@ impl OrderSequencer {
         async_commit_mgr: Arc<AsyncCommitManager>,
         redis_producer: Option<Arc<RedisStreamsProducer>>,
         kafka_producer: Option<Arc<KafkaProducer>>,
+        rabbitmq_producer: Option<Arc<RabbitMQProducer>>,
     ) -> Self {
         Self {
             order_rx,
@@ -64,6 +67,7 @@ impl OrderSequencer {
             async_commit_mgr,
             redis_producer,
             kafka_producer,
+            rabbitmq_producer,
             sequencer_id: Uuid::new_v4().to_string(),
             processed_orders: Arc::new(Mutex::new(0)),
         }
@@ -168,16 +172,44 @@ impl OrderSequencer {
             mdp_guard.process_execution(report.clone()).await;
           }
 
-          // WebSocket 메시지로 변환하여 브로드캐스트
-          let message = WebSocketMessage::Execution(report.clone());
-          match broadcast_tx.send(message) {
-            Ok(receiver_count) => {
-              debug!("시퀀서 {}: 체결 보고서 브로드캐스트 완료 - {} (수신자: {})",
-                     sequencer_id, report.execution_id, receiver_count);
+          // 하이브리드 방식: 체결 상태 결정
+          let order_status = if report.remaining_quantity == 0 {
+            "Filled"
+          } else if report.remaining_quantity < report.quantity {
+            "PartiallyFilled"
+          } else {
+            "Pending"
+          };
+
+          // WebSocket 메시지로 변환하여 RabbitMQ로 발행 (확장성 확보)
+          let message = WebSocketMessage::Execution {
+            execution_report: report.clone(),
+            order_status: order_status.to_string(),
+          };
+          
+          // RabbitMQ Producer를 통한 WebSocket 알림 발행
+          if let Some(rabbitmq_prod) = &self.rabbitmq_producer {
+            match rabbitmq_prod.publish_websocket_message(&message).await {
+              Ok(message_id) => {
+                debug!("시퀀서 {}: RabbitMQ WebSocket 알림 발행 완료 - {} -> {} (상태: {})",
+                       sequencer_id, report.execution_id, message_id, order_status);
+              }
+              Err(e) => {
+                error!("시퀀서 {}: RabbitMQ WebSocket 알림 발행 실패 - {}: {}",
+                       sequencer_id, report.execution_id, e);
+              }
             }
-            Err(e) => {
-              warn!("시퀀서 {}: 체결 보고서 브로드캐스트 실패 - {}: {}",
-                    sequencer_id, report.execution_id, e);
+          } else {
+            // RabbitMQ Producer가 없는 경우 직접 브로드캐스트 (폴백)
+            match broadcast_tx.send(message) {
+              Ok(receiver_count) => {
+                debug!("시퀀서 {}: 직접 브로드캐스트 완료 - {} (수신자: {}, 상태: {})",
+                       sequencer_id, report.execution_id, receiver_count, order_status);
+              }
+              Err(e) => {
+                warn!("시퀀서 {}: 직접 브로드캐스트 실패 - {}: {}",
+                      sequencer_id, report.execution_id, e);
+              }
             }
           }
         }

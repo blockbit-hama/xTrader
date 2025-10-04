@@ -12,6 +12,7 @@ pub fn create_api_router() -> Router<ServerState> {
         // 주문 관련 API
         .route("/v1/order", post(submit_order))
         .route("/v1/order/cancel", post(cancel_order))
+        .route("/v1/order/:order_id", get(get_order_status))
         
         // 시장 데이터 API
         .route("/api/v1/orderbook/:symbol", get(get_orderbook))

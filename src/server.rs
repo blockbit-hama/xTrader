@@ -492,6 +492,7 @@ pub async fn start_server(config: ServerConfig, db_pool: SqlitePool) -> Result<(
         async_commit_mgr.clone(),
         redis_producer.clone(),
         kafka_producer.clone(),
+        rabbitmq_producer.clone(),
     );
 
     // 시퀀서 실행 태스크

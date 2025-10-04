@@ -31,12 +31,15 @@ pub struct WebSocketNotificationMessage {
 impl From<&WebSocketMessage> for WebSocketNotificationMessage {
     fn from(ws_message: &WebSocketMessage) -> Self {
         let (routing_key, symbol, user_id, data) = match ws_message {
-            WebSocketMessage::Execution(execution) => {
+            WebSocketMessage::Execution { execution_report, order_status } => {
                 (
-                    format!("execution.{}", execution.symbol),
-                    Some(execution.symbol.clone()),
+                    format!("execution.{}", execution_report.symbol),
+                    Some(execution_report.symbol.clone()),
                     None, // TODO: ExecutionReport에 user_id 추가 필요
-                    serde_json::to_value(execution).unwrap_or_default(),
+                    serde_json::json!({
+                        "execution_report": execution_report,
+                        "order_status": order_status
+                    }),
                 )
             }
             WebSocketMessage::OrderBookDelta(delta) => {

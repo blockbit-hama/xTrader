@@ -221,6 +221,47 @@ pub async fn get_candles(
     }))
 }
 
+/// 주문 상태 조회 핸들러 (하이브리드 방식)
+pub async fn get_order_status(
+    State(state): State<ServerState>,
+    Path(order_id): Path<String>,
+) -> Result<Json<OrderStatusResponse>, (StatusCode, Json<ErrorResponse>)> {
+    let engine_guard = state.engine.lock().await;
+    
+    // 주문 정보 조회
+    if let Some(order) = engine_guard.get_order(&order_id) {
+        // 주문 상태 결정
+        let status = if order.is_filled() {
+            "Filled"
+        } else if order.remaining_quantity < order.quantity {
+            "PartiallyFilled"
+        } else {
+            "Pending"
+        };
+        
+        Ok(Json(OrderStatusResponse {
+            order_id: order.id.clone(),
+            symbol: order.symbol.clone(),
+            side: format!("{:?}", order.side),
+            order_type: format!("{:?}", order.order_type),
+            price: order.price,
+            quantity: order.quantity,
+            remaining_quantity: order.remaining_quantity,
+            status: status.to_string(),
+            created_at: order.created_at,
+            updated_at: order.updated_at,
+        }))
+    } else {
+        Err((
+            StatusCode::NOT_FOUND,
+            Json(ErrorResponse {
+                error: "ORDER_NOT_FOUND".to_string(),
+                message: "주문을 찾을 수 없습니다".to_string(),
+            }),
+        ))
+    }
+}
+
 /// 호가창 동기화 핸들러 (하이브리드 방식)
 pub async fn sync_orderbook(
     State(state): State<ServerState>,
